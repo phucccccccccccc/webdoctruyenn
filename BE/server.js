@@ -14,19 +14,19 @@ app.use(express.json());
 
 
 app.get("/test", (req, res) => {
-    db.query("SELECT 1 AS test", (err, result) => {
-        if (err) {
-            return res.status(500).json({
-                message: "Lỗi DB",
-                error: err.message
-            });
-        }
+  db.query("SELECT 1 AS test", (err, result) => {
+    if (err) {
+      return res.status(500).json({
+        message: "Lỗi DB",
+        error: err.message
+      });
+    }
 
-        res.json({
-            message: "Kết nối DB thành công",
-            result
-        });
+    res.json({
+      message: "Kết nối DB thành công",
+      result
     });
+  });
 });
 app.use("/api/auth", authRoutes);
 app.post("/register", (req, res) => {
