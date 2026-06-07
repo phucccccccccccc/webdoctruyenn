@@ -16,15 +16,20 @@ app.use(express.json());
 app.get("/test", (req, res) => {
   db.query("SELECT 1 AS test", (err, result) => {
     if (err) {
+      console.log("DB ERROR:", err);
+
       return res.status(500).json({
         message: "Lỗi DB",
-        error: err.message
+        code: err.code,
+        errno: err.errno,
+        sqlState: err.sqlState,
+        error: err.message,
       });
     }
 
     res.json({
       message: "Kết nối DB thành công",
-      result
+      result,
     });
   });
 });
