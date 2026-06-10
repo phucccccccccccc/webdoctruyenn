@@ -14,18 +14,12 @@ app.use(express.json());
 
 
 app.get("/test", (req, res) => {
-  db.query("SELECT 1 AS test", (err, result) => {
-    if (err) {
-      return res.status(500).json({
-        message: "Lỗi DB",
-        error: err.message
-      });
-    }
-
-    res.json({
-      message: "Kết nối DB thành công",
-      result
-    });
+  res.json({
+    host: process.env.DB_HOST,
+    port: process.env.DB_PORT,
+    database: process.env.DB_NAME,
+    user: process.env.DB_USER,
+    hasPassword: !!process.env.DB_PASSWORD
   });
 });
 app.use("/api/auth", authRoutes);
