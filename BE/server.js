@@ -14,14 +14,18 @@ app.use(express.json());
 
 
 app.get("/test", (req, res) => {
-  db.query("SHOW TABLES", (err, result) => {
-    console.log(err);
-
+  db.query("SELECT 1 AS test", (err, result) => {
     if (err) {
-      return res.status(500).json(err);
+      return res.status(500).json({
+        message: "Lỗi DB",
+        error: err.message
+      });
     }
 
-    res.json(result);
+    res.json({
+      message: "Kết nối DB thành công",
+      result
+    });
   });
 });
 app.use("/api/auth", authRoutes);
