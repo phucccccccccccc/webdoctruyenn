@@ -3,7 +3,7 @@ import axios from "axios";
 
 function App(){
   useEffect(() =>{
-    axios.get("http://localhost:5000/api/test")
+    axios.get("http://localhost:5000/test")
     .then((res) => {
       console.log(res.data);
     })

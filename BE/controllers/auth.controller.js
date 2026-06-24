@@ -45,6 +45,8 @@ export const register = (req, res) => {
 
             if (err) {
                 // email đã tồn tại
+                    console.log(err);   // thêm dòng này
+
             if (err.code === "ER_DUP_ENTRY") {
                 return res.status(400).json({
                     errors: [
@@ -65,4 +67,86 @@ export const register = (req, res) => {
             });
         }
     );
+};
+export const login = (req, res) => {
+
+    const { username, password } = req.body;
+
+   if (!username) {
+    return res.status(400).json({
+        errors: [
+            {
+                field: "username",
+                message: "Vui lòng nhập username"
+            }
+        ]
+    });
+}
+
+if (!password) {
+    return res.status(400).json({
+        errors: [
+            {
+                field: "password",
+                message: "Vui lòng nhập password"
+            }
+        ]
+    });
+}
+
+    const sql = "SELECT * FROM users WHERE username = ?";
+
+    db.query(sql, [username], (err, result) => {
+
+        if (err) {
+
+            console.log(err);
+
+            return res.status(500).json({
+                message: "Lỗi server"
+            });
+
+        }
+
+        if (result.length === 0) {
+
+            return res.status(400).json({
+                errors: [
+                    {
+                        field: "username",
+                        message: "Username không tồn tại"
+                    }
+                ]
+            });
+
+        }
+
+        const user = result[0];
+
+        // Vì m đang lưu password dạng text
+        if (password !== user.password) {
+
+            return res.status(400).json({
+                errors: [
+                    {
+                        field: "password",
+                        message: "Mật khẩu không đúng"
+                    }
+                ]
+            });
+
+        }
+
+        res.json({
+            message: "Đăng nhập thành công",
+            user: {
+                id: user.id,
+                username: user.username,
+                email: user.email,
+                role: user.role
+            }
+        });
+
+    });
+
 };
