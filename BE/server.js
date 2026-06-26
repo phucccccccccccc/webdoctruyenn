@@ -28,6 +28,11 @@ app.get("/test", (req, res) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 
+app.use(
+    "/uploads",
+    express.static("uploads")
+);
+
 app.use("/api/books",booksRoutes);
 app.use("/api/category",categoryRoutes);
 app.use("/api/user",userRoutes);

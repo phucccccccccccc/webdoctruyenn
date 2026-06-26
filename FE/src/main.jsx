@@ -1,12 +1,19 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
+import { StrictMode } from 'react';
+import { createRoot } from 'react-dom/client';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-import { BrowserRouter } from "react-router-dom";
+import {
+    BrowserRouter,
+    Routes,
+    Route
+} from "react-router-dom";
+import Register from "./pages/register"; 
+import UserLayout from "./layouts/UserLayout";
+import Home from "./pages/user/Home";
 
-import Dashboard from "./pages/Dashboard/Dashboard";
-
+import DashBoard from "./pages/Dashboard/Dashboard";
+import Overview from "./pages/Dashboard/Overview";
 
 createRoot(document.getElementById('root')).render(
 
@@ -14,10 +21,37 @@ createRoot(document.getElementById('root')).render(
 
         <BrowserRouter>
 
-            <Dashboard />
+            <Routes>
+
+                {/* USER */}
+
+                <Route
+                    path="/"
+                    element={<UserLayout />}
+                >
+                    <Route
+                        index
+                        element={<Home />}
+                    />
+                </Route>
+
+                {/* ADMIN */}
+                <Route path="/register" element={<Register />} />
+
+                <Route
+                    path="/dashboard"
+                    element={<DashBoard />}
+                >
+                    <Route
+                        index
+                        element={<Overview />}
+                    />
+                </Route>
+
+            </Routes>
 
         </BrowserRouter>
 
     </StrictMode>
 
-)
+);
