@@ -1,7 +1,7 @@
 import { Outlet } from "react-router-dom";
 import Sidebar from "../../components/Sidebar";
 import Header from "../../components/Header";
-import Overview from "./Overview";
+
 export default function Dashboard() {
 
     return (
@@ -16,11 +16,8 @@ export default function Dashboard() {
 
                 <div className="p-4 bg-light h-100">
 
-                    <div className="p-4 bg-light h-100">
+                    <Outlet />
 
-    <Overview />
-
-</div>
                 </div>
 
             </div>

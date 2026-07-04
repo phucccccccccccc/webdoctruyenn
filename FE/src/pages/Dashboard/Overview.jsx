@@ -8,8 +8,7 @@ export default function Overview(){
 
     useEffect(()=>{
 
-        axios
-        .get("http://localhost:5000/api/dashboard/stats")
+        axios.get("http://localhost:5000/api/dashboard/stats")
 
         .then((res)=>{
 
@@ -28,85 +27,49 @@ export default function Overview(){
     return(
 
         <Row>
-
             <Col md={3}>
-
                 <Card className="shadow">
-
                     <Card.Body>
-
                         <h6>Tổng số sách</h6>
-
                         <h2>
-
                             {stats.totalBooks}
-
                         </h2>
-
                     </Card.Body>
-
                 </Card>
-
             </Col>
 
             <Col md={3}>
-
                 <Card className="shadow">
-
                     <Card.Body>
-
                         <h6>Tổng số user</h6>
-
                         <h2>
-
                             {stats.totalUsers}
-
                         </h2>
-
                     </Card.Body>
-
                 </Card>
 
             </Col>
 
             <Col md={3}>
-
                 <Card className="shadow">
-
                     <Card.Body>
-
                         <h6>Tổng số coin</h6>
-
                         <h2>
-
                             {stats.totalCoins}
-
                         </h2>
-
                     </Card.Body>
-
                 </Card>
-
             </Col>
 
             <Col md={3}>
-
                 <Card className="shadow">
-
                     <Card.Body>
-
                         <h6>Tổng giao dịch</h6>
-
                         <h2>
-
                             {stats.totalTransactions}
-
                         </h2>
-
                     </Card.Body>
-
                 </Card>
-
             </Col>
 
         </Row>

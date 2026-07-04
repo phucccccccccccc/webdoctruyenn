@@ -1,7 +1,7 @@
 import {db} from "../config/config.js";
 
 export const getUser =( req,res)=> {
-    const sql=` select u.username,u.email,u.role from users u`;
+    const sql=` select* from users u`;
     db.query(sql,(err,result)=>{
     if(err){
         console.log(err);

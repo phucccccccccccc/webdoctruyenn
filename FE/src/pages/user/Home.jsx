@@ -55,9 +55,6 @@ useEffect(() => {
 return (
 
     <>
-
-       
-
         <h3 className="mb-3">
              Sách nổi bật
         </h3>

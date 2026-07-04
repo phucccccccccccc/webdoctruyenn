@@ -14,7 +14,10 @@ import Home from "./pages/user/Home";
 
 import DashBoard from "./pages/Dashboard/Dashboard";
 import Overview from "./pages/Dashboard/Overview";
-
+import BooksDB from "./pages/Dashboard/Books";
+import CategoriesDB from "./pages/Dashboard/Categories";
+import UserDB from "./pages/Dashboard/Users";
+import TransactionDB from "./pages/Dashboard/Transactions";
 createRoot(document.getElementById('root')).render(
 
     <StrictMode>
@@ -46,6 +49,23 @@ createRoot(document.getElementById('root')).render(
                         index
                         element={<Overview />}
                     />
+                    <Route
+                        path="books"
+                        element={<BooksDB />}
+                    />
+                       <Route
+                        path="categories"
+                        element={<CategoriesDB />}
+                    />
+                       <Route
+                        path="users"
+                        element={<UserDB />}
+                    />
+                    <Route
+                        path="transactions"
+                        element={<TransactionDB />}
+                    />
+                    
                 </Route>
 
             </Routes>
