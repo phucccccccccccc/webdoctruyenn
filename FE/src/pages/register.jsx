@@ -1,5 +1,6 @@
 import { useState } from "react";
 import  axios  from "axios";
+import { useNavigate } from "react-router-dom";
 
 function Register() {
     const [username,setUsername] =useState("");
@@ -9,6 +10,7 @@ function Register() {
     const [usernameErr,setUsernameErr] =useState("");
     const [emailErr,setEmailErr] = useState("");
     const [passwordErr,setPasswordErr] = useState("");
+    const navigate = useNavigate();
 
     const handleRegister =async (e) =>{
         e.preventDefault();
@@ -28,7 +30,10 @@ function Register() {
                 }
             );
             console.log(res.data);
-            alert("Đăng ký thành công");
+
+alert("Đăng ký thành công!");
+
+navigate("/login");
 
         }catch(error){
 

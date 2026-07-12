@@ -1,9 +1,20 @@
 import { Navbar, Nav, Container, Button } from "react-bootstrap";
-import { Link } from "react-router-dom";
 import { FaSearch } from "react-icons/fa";
+import { useNavigate, Link } from "react-router-dom";
 
 export default function UserHeader() {
 
+    const navigate = useNavigate();
+
+const user = JSON.parse(localStorage.getItem("user"));
+
+const handleLogout = () => {
+
+    localStorage.removeItem("user");
+
+    navigate("/");
+
+};
 return (
 
     <Navbar
@@ -33,7 +44,7 @@ return (
                         Trang chủ
                     </Nav.Link>
 
-                    <Nav.Link as={Link} to="/api/books">
+                    <Nav.Link as={Link} to="/books">
                         Tất cả sách
                     </Nav.Link>
 
@@ -41,7 +52,7 @@ return (
                         Sách đã mua 
                     </Nav.Link>
 
-                    <Nav.Link as={Link} to="/audio-books">
+                    <Nav.Link as={Link} to="/reading-history">
                         Sách đã đọc 
                     </Nav.Link>
 
@@ -58,21 +69,44 @@ return (
                     </Nav.Link>
 
 
-                    <Button
-                        variant="outline-light"
-                        className="me-2 rounded-pill"
-                         href="/register" 
-                    >
-                        Đăng ký
-                    </Button>
+                    {
+    user ? (
+        <>
+            <span className="text-white me-3">
+    Xin chào, <b>
+        {user.username.charAt(0).toUpperCase() + user.username.slice(1)}
+    </b>
+</span>
+            <Button
+                variant="outline-danger"
+                className="rounded-pill"
+                onClick={handleLogout}
+            >
+                Đăng xuất
+            </Button>
+        </>
+    ) : (
+        <>
+            <Button
+                as={Link}
+                to="/register"
+                variant="outline-light"
+                className="me-2 rounded-pill"
+            >
+                Đăng ký
+            </Button>
 
-                    <Button
-                        variant="success"
-                        className="rounded-pill"
-                        href="/dashboard"
-                    >
-                        Đăng nhập
-                    </Button>
+            <Button
+                as={Link}
+                to="/login"
+                variant="success"
+                className="rounded-pill"
+            >
+                Đăng nhập
+            </Button>
+        </>
+    )
+}
 
                 </Nav>
 

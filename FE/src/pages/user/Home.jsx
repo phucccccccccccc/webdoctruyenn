@@ -1,6 +1,13 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { Row, Col, Card, Button } from "react-bootstrap";
+import {
+    FaEye,
+    FaHeart,
+    FaCoins,
+    FaUserEdit
+} from "react-icons/fa";
+import { Link } from "react-router-dom";
 
 export default function Home() {
 
@@ -94,13 +101,27 @@ return (
                                     {book.author}
                                 </p>
 
-                                <p>
-                                    {book.coin_price} Coin
+                                <p className="mb-2">
+                                    <FaCoins className="text-warning me-2" />
+                                        {book.coin_price} Coin
                                 </p>
 
-                                <Button className="bg-success">
-                                    Xem chi tiết
-                                </Button>
+                                <p className="mb-2">
+                                    <FaEye className="text-primary me-2" />
+                                    {book.views}
+                                </p>
+
+                                <p className="mb-3">
+                                    <FaHeart className="text-danger me-2" />
+                                    {book.favorites}
+                                </p>
+
+                                   <Link
+                                        to={`/books/${book.id}`}
+                                        className="btn btn-success w-100"
+                                    >
+                                        Xem chi tiết
+                                    </Link>
 
                             </Card.Body>
 
@@ -180,9 +201,12 @@ return (
                         <p>
                             {book.coin_price} Coin
                         </p>
-                                <Button className="bg-success">
-                                    Xem chi tiết
-                                </Button>
+                                   <Link
+                                        to={`/books/${book.id}`}
+                                        className="btn btn-success w-100"
+                                    >
+                                        Xem chi tiết
+                                    </Link>
 
                     </Card.Body>
 

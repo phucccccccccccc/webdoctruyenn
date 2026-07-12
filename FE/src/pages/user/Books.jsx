@@ -1,173 +1,231 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import {
-    Table,
-    Button,
+    FaEye,
+    FaHeart,
+    FaCoins,
+    FaUserEdit
+} from "react-icons/fa";
+import {
+    Container,
     Row,
     Col,
+    Card,
+    Button,
     Form,
-    Image,
-    Card
+    InputGroup
 } from "react-bootstrap";
+import { Link } from "react-router-dom";
 
 export default function Books() {
 
     const [books, setBooks] = useState([]);
+    const [search, setSearch] = useState("");
+    const [categories, setCategories] = useState([]);
+    
+
+    // Lấy tất cả sách
+    const loadBooks = () => {
+
+        axios.get("http://localhost:5000/api/books")
+            .then((res) => {
+                setBooks(res.data);
+            })
+            .catch((err) => {
+                console.log(err);
+            });
+
+    };
+
+    // Lấy danh mục
+    const loadCategories = () => {
+
+        axios.get("http://localhost:5000/api/category")
+            .then((res) => {
+                setCategories(res.data);
+            })
+            .catch((err) => {
+                console.log(err);
+            });
+
+    };
 
     useEffect(() => {
 
-        axios
-            .get("http://localhost:5000/api/books")
-            .then((res) => {
-
-                setBooks(res.data);
-
-            })
-            .catch((err) => {
-
-                console.log(err);
-
-            });
+        loadBooks();
+        loadCategories();
 
     }, []);
 
+    // Tìm kiếm
+const handleSearch = (e) => {
+    e.preventDefault();
+
+    if (search.trim() === "") {
+        loadBooks();
+        return;
+    }
+
+    axios
+        .get(`http://localhost:5000/api/books/search/${search}`)
+        .then((res) => {
+            setBooks(res.data);
+        })
+        .catch((err) => {
+            console.log(err);
+        });
+};
+
+    // Lọc theo thể loại
+    const handleCategory = (id) => {
+
+        if (id === "") {
+            loadBooks();
+            return;
+        }
+
+        axios.get(`http://localhost:5000/api/books/category/${id}`)
+            .then((res) => {
+                setBooks(res.data);
+            })
+            .catch((err) => {
+                console.log(err);
+            });
+
+    };
+
     return (
 
-        <Card className="shadow">
+        <Container className="py-5">
 
-            <Card.Body>
+            <Row className="mb-4">
 
-                <Row className="mb-4">
+                <Col md={8}>
 
-                    <Col>
+                   <Form onSubmit={handleSearch}>
+    <InputGroup>
 
-                        <h3>Quản lý sách</h3>
+        <Form.Control
+            type="text"
+            placeholder="Nhập tên sách..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+        />
 
-                    </Col>
+        <Button
+            type="submit"
+            variant="success"
+        >
+            Tìm kiếm
+        </Button>
 
-                    <Col className="text-end">
+    </InputGroup>
+</Form>
 
-                        <Button variant="primary">
+                </Col>
 
-                            + Thêm sách
+                <Col md={4}>
 
-                        </Button>
+                    <Form.Select
+                        onChange={(e) => handleCategory(e.target.value)}
+                    >
 
-                    </Col>
-
-                </Row>
-
-                <Row className="mb-3">
-
-                    <Col md={4}>
-
-                        <Form.Control
-                            placeholder="Tìm tên sách..."
-                        />
-
-                    </Col>
-
-                    <Col>
-
-                        <Button>
-
-                            Tìm kiếm
-
-                        </Button>
-
-                    </Col>
-
-                </Row>
-
-                <Table bordered hover responsive>
-
-                    <thead>
-
-                        <tr>
-
-                            <th>ID</th>
-
-                            <th>Ảnh</th>
-
-                            <th>Tên sách</th>
-
-                            <th>Tác giả</th>
-
-                            <th>Coin</th>
-
-                            <th>Thao tác</th>
-
-                        </tr>
-
-                    </thead>
-
-                    <tbody>
+                        <option value="">
+                            Tất cả thể loại
+                        </option>
 
                         {
+                            categories.map((cate) => (
 
-                            books.map((book) => (
-
-                                <tr key={book.id}>
-
-                                    <td>{book.id}</td>
-
-                                    <td>
-
-                                        <Image
-                                            src={`http://localhost:5000/uploads/${book.cover_image}`}
-                                            width={60}
-                                            height={80}
-                                            rounded
-                                        />
-
-                                    </td>
-
-                                    <td>{book.title}</td>
-
-                                    <td>{book.author}</td>
-
-                                    <td>{book.coin_price}</td>
-
-                                    <td>
-
-                                        <Button
-                                            size="sm"
-                                            variant="warning"
-                                            className="me-2"
-                                        >
-                                            Sửa
-                                        </Button>
-
-                                        <Button
-                                            size="sm"
-                                            variant="danger"
-                                            className="me-2"
-                                        >
-                                            Xóa
-                                        </Button>
-
-                                        <Button
-                                            size="sm"
-                                            variant="success"
-                                        >
-                                            Chương
-                                        </Button>
-
-                                    </td>
-
-                                </tr>
+                                <option
+                                    key={cate.id}
+                                    value={cate.id}
+                                >
+                                    {cate.name}
+                                </option>
 
                             ))
-
                         }
 
-                    </tbody>
+                    </Form.Select>
 
-                </Table>
+                </Col>
 
-            </Card.Body>
+            </Row>
 
-        </Card>
+            <p>
+                Hiển thị <b>{books.length}</b> cuốn sách
+            </p>
+
+            <Row>
+
+                {
+                    books.map((book) => (
+
+                        <Col
+                            lg={3}
+                            md={4}
+                            sm={6}
+                            className="mb-4"
+                            key={book.id}
+                        >
+
+                            <Card className="h-100 shadow">
+
+                                <Card.Img
+                                    variant="top"
+                                src={`http://localhost:5000/uploads/${book.cover_image}`}
+                                style={{
+                                    height: "320px",
+                                    width: "100%",
+                                    objectFit: "contain",
+                                    backgroundColor: "#f5f5f5"
+                                }}
+                                />
+
+                                <Card.Body>
+
+                                    <h5>{book.title}</h5>
+
+                                    <p className="text-muted">
+                                        {book.author}
+                                    </p>
+
+                                    <p>
+                                        <FaCoins className="text-warning me-2" />
+                                         {book.coin_price} Coin
+                                    </p>
+
+                                    <p>
+                                    <FaEye className="text-primary me-2" />
+
+                                         {book.views}
+                                    </p>
+
+                                    <p>
+                                    <FaHeart className="text-danger me-2" />
+                                         {book.favorites}
+                                    </p>
+
+                                    <Link
+                                        to={`/books/${book.id}`}
+                                        className="btn btn-success w-100"
+                                    >
+                                        Xem chi tiết
+                                    </Link>
+
+                                </Card.Body>    
+
+                            </Card>
+
+                        </Col>
+
+                    ))
+                }
+
+            </Row>
+
+        </Container>
 
     );
 
