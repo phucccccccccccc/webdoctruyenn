@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../../api/api";
 import { useParams } from "react-router-dom";
 import { Link } from "react-router-dom";
 
@@ -28,14 +28,14 @@ export default function BookDetail(){
 
     useEffect(()=>{
 
-        axios.get(`http://localhost:5000/api/books/${id}`)
+        api.get(`/books/${id}`)
         .then((res)=>{
 
             setBook(res.data);
 
         });
 
-        axios.get(`http://localhost:5000/api/books/${id}/chapters`)
+        api.get(`/books/${id}/chapters`)
         .then((res)=>{
 
             setChapters(res.data);

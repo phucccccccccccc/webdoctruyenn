@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../../api/api";
 import {
     useParams,
     Link
@@ -19,9 +19,9 @@ export default function Reader(){
     const user = JSON.parse(localStorage.getItem("user"));
     const loadChapter = () => {
 
-    axios
+    api
         .get(
-            `http://localhost:5000/api/books/${bookId}/chapter/${chapterNumber}`
+            `/books/${bookId}/chapter/${chapterNumber}`
         )
         .then((res) => {
 
@@ -37,22 +37,19 @@ export default function Reader(){
 };
 const saveHistory = () => {
 
-    axios.post(
-        "http://localhost:5000/api/user/history",
-        {
-            user_id: user.id,
-            book_id: bookId,
-            chapter_number: chapterNumber,
-            last_position: 0
+api.post(
+    "/user/history",
+    {
+        book_id,
+        chapter_number
+    },
+    {
+        headers: {
+            Authorization:
+                `Bearer ${localStorage.getItem("token")}`
         }
-    )
-    .catch((err) => {
-
-        console.log(err);
-
-    });
-
-};
+    }
+);
    useEffect(() => {
 
     loadChapter();
@@ -136,4 +133,5 @@ const saveHistory = () => {
 
     );
 
+}
 }

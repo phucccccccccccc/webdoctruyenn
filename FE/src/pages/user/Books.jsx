@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../../api/api";
 import {
     FaEye,
     FaHeart,
@@ -27,7 +27,7 @@ export default function Books() {
     // Lấy tất cả sách
     const loadBooks = () => {
 
-        axios.get("http://localhost:5000/api/books")
+        api.get("/books")
             .then((res) => {
                 setBooks(res.data);
             })
@@ -40,7 +40,7 @@ export default function Books() {
     // Lấy danh mục
     const loadCategories = () => {
 
-        axios.get("http://localhost:5000/api/category")
+        api.get("/category")
             .then((res) => {
                 setCategories(res.data);
             })
@@ -66,8 +66,8 @@ const handleSearch = (e) => {
         return;
     }
 
-    axios
-        .get(`http://localhost:5000/api/books/search/${search}`)
+    api
+        .get(`/books/search/${search}`)
         .then((res) => {
             setBooks(res.data);
         })
@@ -84,7 +84,7 @@ const handleSearch = (e) => {
             return;
         }
 
-        axios.get(`http://localhost:5000/api/books/category/${id}`)
+        api.get(`/books/category/${id}`)
             .then((res) => {
                 setBooks(res.data);
             })

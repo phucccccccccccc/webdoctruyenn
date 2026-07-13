@@ -271,3 +271,220 @@ export const getChapter = (req, res) => {
     );
 
 };
+export const updateReadingHistory = (req, res) => {
+
+    const userId = req.user.id;
+
+    const { book_id } = req.body;
+
+    // dùng userId thay vì req.body.user_id
+
+};
+export const buyBook = (req, res) => {
+
+    const userId = req.user.id;
+    const { book_id } = req.body;
+
+    db.getConnection((err, connection) => {
+
+        if (err)
+            return res.status(500).json(err);
+
+        connection.beginTransaction((err) => {
+
+            if (err) {
+                connection.release();
+                return res.status(500).json(err);
+            }
+
+            // 1. Lấy thông tin sách
+            const bookSql = `
+                SELECT
+                    id,
+                    title,
+                    coin_price
+                FROM books
+                WHERE id = ?
+            `;
+
+            connection.query(bookSql, [book_id], (err, books) => {
+
+                if (err) {
+                    return connection.rollback(() => {
+                        connection.release();
+                        res.status(500).json(err);
+                    });
+                }
+
+                if (books.length === 0) {
+                    return connection.rollback(() => {
+                        connection.release();
+                        res.status(404).json({
+                            message: "Không tìm thấy sách"
+                        });
+                    });
+                }
+
+                const book = books[0];
+
+                // 2. Kiểm tra đã mua chưa
+                const checkSql = `
+                    SELECT *
+                    FROM user_books
+                    WHERE user_id = ?
+                    AND book_id = ?
+                `;
+
+                connection.query(checkSql, [userId, book_id], (err, purchased) => {
+
+                    if (err) {
+                        return connection.rollback(() => {
+                            connection.release();
+                            res.status(500).json(err);
+                        });
+                    }
+
+                    if (purchased.length > 0) {
+                        return connection.rollback(() => {
+                            connection.release();
+                            res.status(400).json({
+                                message: "Bạn đã mua sách này"
+                            });
+                        });
+                    }
+
+                    // 3. Lấy coin user
+                    const userSql = `
+                        SELECT total_coin
+                        FROM users
+                        WHERE id = ?
+                    `;
+
+                    connection.query(userSql, [userId], (err, users) => {
+
+                        if (err) {
+                            return connection.rollback(() => {
+                                connection.release();
+                                res.status(500).json(err);
+                            });
+                        }
+
+                        const user = users[0];
+
+                        if (user.total_coin < book.coin_price) {
+                            return connection.rollback(() => {
+                                connection.release();
+                                res.status(400).json({
+                                    message: "Không đủ coin"
+                                });
+                            });
+                        }
+
+                        // 4. Trừ coin
+                        const updateCoinSql = `
+                            UPDATE users
+                            SET total_coin = total_coin - ?
+                            WHERE id = ?
+                        `;
+
+                        connection.query(
+                            updateCoinSql,
+                            [book.coin_price, userId],
+                            (err) => {
+
+                                if (err) {
+                                    return connection.rollback(() => {
+                                        connection.release();
+                                        res.status(500).json(err);
+                                    });
+                                }
+
+                                // 5. Lưu sách đã mua
+                                const insertBookSql = `
+                                    INSERT INTO user_books
+                                    (
+                                        user_id,
+                                        book_id
+                                    )
+                                    VALUES (?,?)
+                                `;
+
+                                connection.query(
+                                    insertBookSql,
+                                    [userId, book_id],
+                                    (err) => {
+
+                                        if (err) {
+                                            return connection.rollback(() => {
+                                                connection.release();
+                                                res.status(500).json(err);
+                                            });
+                                        }
+
+                                        // 6. Ghi lịch sử giao dịch
+                                        const transactionSql = `
+                                            INSERT INTO transactions
+                                            (
+                                                user_id,
+                                                amount,
+                                                type,
+                                                description
+                                            )
+                                            VALUES (?,?,?,?)
+                                        `;
+
+                                        connection.query(
+                                            transactionSql,
+                                            [
+                                                userId,
+                                                book.coin_price,
+                                                "spend",
+                                                `Mua sách: ${book.title}`
+                                            ],
+                                            (err) => {
+
+                                                if (err) {
+                                                    return connection.rollback(() => {
+                                                        connection.release();
+                                                        res.status(500).json(err);
+                                                    });
+                                                }
+
+                                                // 7. Hoàn tất
+                                                connection.commit((err) => {
+
+                                                    if (err) {
+                                                        return connection.rollback(() => {
+                                                            connection.release();
+                                                            res.status(500).json(err);
+                                                        });
+                                                    }
+
+                                                    connection.release();
+
+                                                    res.json({
+                                                        message: "Mua sách thành công"
+                                                    });
+
+                                                });
+
+                                            }
+                                        );
+
+                                    }
+                                );
+
+                            }
+                        );
+
+                    });
+
+                });
+
+            });
+
+        });
+
+    });
+
+};

@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../../api/api";
 import { Row, Col, Card, Button } from "react-bootstrap";
 import {
     FaEye,
     FaHeart,
-    FaCoins,
-    FaUserEdit
+    FaCoins
+    
 } from "react-icons/fa";
 import { Link } from "react-router-dom";
 
@@ -18,8 +18,8 @@ const [categories, setCategories] = useState([]);
 
 useEffect(() => {
 
-    axios
-        .get("http://localhost:5000/api/books/featured")
+    api
+        .get("/books/featured")
         .then((res) => {
 
             setFeaturedBooks(res.data);
@@ -31,8 +31,8 @@ useEffect(() => {
 
         });
 
-    axios
-        .get("http://localhost:5000/api/books/new")
+    api
+        .get("/books/new")
         .then((res) => {
 
             setNewBooks(res.data);
@@ -44,8 +44,8 @@ useEffect(() => {
 
         });
 
-    axios
-        .get("http://localhost:5000/api/category")
+    api
+        .get("/category")
         .then((res) => {
 
             setCategories(res.data);

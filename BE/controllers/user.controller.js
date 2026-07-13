@@ -14,6 +14,8 @@ export const getUser =( req,res)=> {
 };
 export const getPurchasedBooks = (req, res) => {
 
+    const userId = req.user.id;
+
     const sql = `
         SELECT
             b.*
@@ -24,7 +26,7 @@ export const getPurchasedBooks = (req, res) => {
         ORDER BY ub.purchase_date DESC
     `;
 
-    db.query(sql, [req.params.userId], (err, result) => {
+    db.query(sql, [userId], (err, result) => {
 
         if (err)
             return res.status(500).json(err);
@@ -36,8 +38,9 @@ export const getPurchasedBooks = (req, res) => {
 };
 export const updateReadingHistory = (req, res) => {
 
+    const user_id = req.user.id;
+
     const {
-        user_id,
         book_id,
         chapter_number,
         last_position
@@ -83,7 +86,9 @@ export const updateReadingHistory = (req, res) => {
     );
 
 };
-export const getReadingHistory = (req,res)=>{
+export const getReadingHistory = (req, res) => {
+
+    const userId = req.user.id;
 
     const sql = `
         SELECT
@@ -104,13 +109,13 @@ export const getReadingHistory = (req,res)=>{
         ORDER BY rh.last_read_at DESC
     `;
 
-    db.query(sql,[req.params.userId],(err,result)=>{
+    db.query(sql, [userId], (err, result) => {
 
-        if(err)
+        if (err)
             return res.status(500).json(err);
 
         res.json(result);
 
     });
 
-}
+};

@@ -1,4 +1,5 @@
 import express from "express";
+import { verifyToken } from "../middlewares/auth.middleware.js";
 
 import {
     getBooks,
@@ -10,7 +11,8 @@ import {
     getBooksByViews,
     getBooksByPrice,
     getBookChapters,
-    getChapter
+    getChapter,
+    buyBook
 }
 from "../controllers/books.controller.js";
 
@@ -21,8 +23,6 @@ router.get("/", getBooks);
 router.get("/featured", getFeaturedBooks);
 
 router.get("/new", getNewBooks);
-
-router.get("/", getBooks);
 
 router.get("/views", getBooksByViews);
 
@@ -35,5 +35,14 @@ router.get("/category/:id", getBooksByCategory);
 router.get("/:id", getBookById);
 
 router.get("/:id/chapters", getBookChapters);
-router.get("/:bookId/chapter/:chapterNumber", getChapter);
+router.get(
+    "/:bookId/chapter/:chapterNumber",
+    verifyToken,
+    getChapter
+);
+router.post(
+    "/buy",
+    verifyToken,
+    buyBook
+);
 export default router;

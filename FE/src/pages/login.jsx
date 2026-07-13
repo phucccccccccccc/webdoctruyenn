@@ -1,7 +1,7 @@
 import { useState } from "react";
-import axios from "axios";
+import api from "../api/api";
 import { useNavigate } from "react-router-dom";
-
+import { GoogleLogin } from "@react-oauth/google";
 export default function Login() {
 
     const navigate = useNavigate();
@@ -12,6 +12,49 @@ export default function Login() {
     const [usernameErr, setUsernameErr] = useState("");
     const [passwordErr, setPasswordErr] = useState("");
     const [error, setError] = useState("");
+
+const handleGoogleSuccess = async (credentialResponse) => {
+
+    try {
+
+        const res = await api.post(
+            "/auth/google",
+            {
+                credential: credentialResponse.credential
+            }
+        );
+
+        localStorage.setItem(
+    "token",
+    res.data.token
+);
+
+localStorage.setItem(
+    "user",
+    JSON.stringify(res.data.user)
+);
+
+        if (res.data.user.role === "admin") {
+            navigate("/dashboard");
+        } else {
+            navigate("/");
+        }
+
+    } catch (err) {
+
+        console.log(err);
+
+        setError("Đăng nhập Google thất bại");
+
+    }
+
+};
+
+const handleGoogleError = () => {
+
+    console.log("Google Login Failed");
+
+};
 
     const handleLogin = async (e) => {
 
@@ -37,18 +80,23 @@ export default function Login() {
 
         try {
 
-            const res = await axios.post(
-                "http://localhost:5000/api/auth/login",
+            const res = await api.post(
+                "/auth/login",
                 {
                     username,
                     password
                 }
-            );
+);
 
-            localStorage.setItem(
-                "user",
-                JSON.stringify(res.data.user)
-            );
+           localStorage.setItem(
+    "token",
+    res.data.token
+);
+
+localStorage.setItem(
+    "user",
+    JSON.stringify(res.data.user)
+);
 
             alert("Đăng nhập thành công");
 
@@ -147,12 +195,27 @@ export default function Login() {
 
                                 </div>
 
+                              
                                 <button
-                                    type="submit"
-                                    className="btn btn-primary w-100"
-                                >
-                                    Đăng nhập
-                                </button>
+    type="submit"
+    className="btn btn-primary w-100"
+>
+    Đăng nhập
+</button>
+
+<div className="text-center my-3">
+    <hr />
+    <span>Hoặc</span>
+</div>
+
+<div className="d-flex justify-content-center">
+
+    <GoogleLogin
+        onSuccess={handleGoogleSuccess}
+        onError={handleGoogleError}
+    />
+
+</div>
 
                             </form>
 

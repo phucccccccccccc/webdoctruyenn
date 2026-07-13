@@ -1,9 +1,15 @@
 import { db } from "../config/config.js";
+import { OAuth2Client } from "google-auth-library";
+import jwt from "jsonwebtoken";
 
+const client = new OAuth2Client(
+    process.env.GOOGLE_CLIENT_ID
+);
 export const register = (req, res) => {
     const { username, email, password } = req.body;
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
      const sql ="INSERT INTO users (username, email, password) VALUES (?, ?, ?)";
+
 
     const errors = [];
     // username
@@ -137,16 +143,169 @@ if (!password) {
 
         }
 
+        const token = jwt.sign(
+    {
+        id: user.id,
+        role: user.role
+    },
+    process.env.JWT_SECRET,
+    {
+        expiresIn: "7d"
+    }
+);
+
+res.json({
+    message: "Đăng nhập thành công",
+    token,
+    user: {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        role: user.role
+    }
+});
+
+    });
+
+};
+export const googleLogin = async (req, res) => {
+
+    try {
+
+        const { credential } = req.body;
+
+        const ticket = await client.verifyIdToken({
+            idToken: credential,
+            audience: process.env.GOOGLE_CLIENT_ID
+        });
+
+        const payload = ticket.getPayload();
+
+        const email = payload.email;
+        const username = payload.name;
+        const googleId = payload.sub;
+        const avatar = payload.picture;
+
+const sql = "SELECT * FROM users WHERE email = ?";
+
+db.query(sql, [email], (err, result) => {
+
+    if (err) {
+
+        return res.status(500).json({
+            message: "Lỗi server"
+        });
+
+    }
+
+    if (result.length > 0) {
+
+    const user = result[0];
+
+    const token = jwt.sign(
+        {
+            id: user.id,
+            role: user.role
+        },
+        process.env.JWT_SECRET,
+        {
+            expiresIn: "7d"
+        }
+    );
+
+    return res.json({
+        message: "Đăng nhập thành công",
+        token,
+        user: {
+            id: user.id,
+            username: user.username,
+            email: user.email,
+            role: user.role
+        }
+    });
+
+}
+
+// Chưa có tài khoản
+// => INSERT
+
+const insertSql = `
+INSERT INTO users
+(
+    username,
+    email,
+    password,
+    login_type,
+    google_id,
+    avatar
+)
+VALUES (?,?,?,?,?,?)
+`;
+
+db.query(
+    insertSql,
+    [
+        username,
+        email,
+        "",
+        "google",
+        googleId,
+        avatar
+    ],
+    (err, insertResult) => {
+
+        if (err) {
+
+            console.log(err);
+
+            return res.status(500).json({
+                message: "Lỗi tạo tài khoản"
+            });
+
+        }
+    const token = jwt.sign(
+    {
+        id: insertResult.insertId,
+        role: "user"
+    },
+    process.env.JWT_SECRET,
+    {
+        expiresIn: "7d"
+    }
+);
+
         res.json({
             message: "Đăng nhập thành công",
+            token,
             user: {
-                id: user.id,
-                username: user.username,
-                email: user.email,
-                role: user.role
+                id: insertResult.insertId,
+                username,
+                email,
+                role: "user"
             }
         });
 
+    }
+);
+
+  
+
+});
+    } catch (err) {
+
+    console.log(err);
+
+    return res.status(500).json({
+        message: "Đăng nhập Google thất bại"
+    });
+
+}
+
+};
+export const profile = (req, res) => {
+
+    res.json({
+        user: req.user
     });
 
 };

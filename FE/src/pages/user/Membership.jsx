@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../../api/api";
 import {
     Container,
     Row,
@@ -17,8 +17,8 @@ export default function Membership() {
 
     useEffect(() => {
 
-        axios
-            .get(`http://localhost:5000/api/user/books/${user.id}`)
+        api
+            .get(`/user/books/${user.id}`)
             .then((res) => {
 
                 setBooks(res.data);

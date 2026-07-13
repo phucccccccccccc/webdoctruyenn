@@ -1,5 +1,5 @@
 import { useState } from "react";
-import  axios  from "axios";
+import api from "../api/api";
 import { useNavigate } from "react-router-dom";
 
 function Register() {
@@ -21,8 +21,8 @@ function Register() {
         setPasswordErr(""); 
 
         try{
-            const res = await axios.post(
-                "http://localhost:5000/api/auth/register",
+            const res = await api.post(
+                "/auth/register",
                 {
                     username,
                     email,

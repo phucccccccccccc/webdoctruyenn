@@ -88,7 +88,7 @@ return (
                         Sách đã đọc 
                     </Nav.Link>
 
-                    <Nav.Link as={Link} to="/categories">
+                    <Nav.Link as={Link} to="/buy">
                         Nạp Tiền
                     </Nav.Link>
 
@@ -122,7 +122,7 @@ return (
 
 
                     {
-    user ? (
+    user ? (    
         <>
             <span className="text-white me-3">
     Xin chào, <b>

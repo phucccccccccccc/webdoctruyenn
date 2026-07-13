@@ -9,6 +9,7 @@ import booksRoutes from "./routes/books.routes.js";
 import categoryRoutes from "./routes/category.routes.js";
 import userRoutes from "./routes/user.routes.js";
 import transactionsRoutes from "./routes/transactions.routes.js";
+import { verifyToken } from "./middlewares/auth.middleware.js";
 dotenv.config();
 
 const app = express();
@@ -42,3 +43,12 @@ const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
+app.get(
+    "/api/profile",
+    verifyToken,
+    (req, res) => {
+
+        res.json(req.user);
+
+    }
+);
