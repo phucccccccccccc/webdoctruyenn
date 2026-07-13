@@ -16,20 +16,50 @@ export default function Reader(){
     const { bookId, chapterNumber } = useParams();
 
     const [chapter,setChapter]=useState({});
+    const user = JSON.parse(localStorage.getItem("user"));
+    const loadChapter = () => {
 
-    useEffect(()=>{
-
-        axios
+    axios
         .get(
             `http://localhost:5000/api/books/${bookId}/chapter/${chapterNumber}`
         )
-        .then((res)=>{
+        .then((res) => {
 
             setChapter(res.data);
 
+        })
+        .catch((err) => {
+
+            console.log(err);
+
         });
 
-    },[bookId,chapterNumber]);
+};
+const saveHistory = () => {
+
+    axios.post(
+        "http://localhost:5000/api/user/history",
+        {
+            user_id: user.id,
+            book_id: bookId,
+            chapter_number: chapterNumber,
+            last_position: 0
+        }
+    )
+    .catch((err) => {
+
+        console.log(err);
+
+    });
+
+};
+   useEffect(() => {
+
+    loadChapter();
+
+    saveHistory();
+
+}, [bookId, chapterNumber]);
 
     return(
 
@@ -40,10 +70,12 @@ export default function Reader(){
                 <Card.Body>
 
                     <h2 className="text-center">
+    {chapter.title}
+</h2>
 
-                        {chapter.book_title}
-
-                    </h2>
+<h5 className="text-center text-muted">
+    Chương {chapter.chapter_number}
+</h5>
 
                    
 
@@ -71,11 +103,14 @@ export default function Reader(){
                             to={`/books/${bookId}/chapter/${Number(chapterNumber)-1}`}
                         >
 
-                            <Button variant="success">
-
-                                ← Chương trước
-
-                            </Button>
+                           <Button
+    as={Link}
+    to={`/books/${bookId}/chapter/${Number(chapterNumber)-1}`}
+    variant="success"
+    disabled={Number(chapterNumber) === 1}
+>
+    ← Chương trước
+</Button>
 
                         </Link>
 

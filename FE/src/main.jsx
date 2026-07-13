@@ -8,6 +8,8 @@ import {
     Routes,
     Route
 } from "react-router-dom";
+import { GoogleOAuthProvider } from "@react-oauth/google";
+
 import AdminRoute from './components/AdminRoute';
 import ProtectedRoute from './components/ProtectedRoute';
 import Register from "./pages/register"; 
@@ -26,9 +28,11 @@ import CategoriesDB from "./pages/Dashboard/Categories";
 import UserDB from "./pages/Dashboard/Users";
 import TransactionDB from "./pages/Dashboard/Transactions";
 import Membership from "./pages/user/Membership";
+import ReadingHistory from "./pages/user/ReadingHistory";
 createRoot(document.getElementById('root')).render(
 
     <StrictMode>
+        <GoogleOAuthProvider clientId="YOUR_GOOGLE_CLIENT_ID">
 
         <BrowserRouter>
 
@@ -69,6 +73,14 @@ element={
     element={
         <ProtectedRoute>
             <Membership />
+        </ProtectedRoute>
+    }
+/>
+<Route
+    path="reading-history"
+    element={
+        <ProtectedRoute>
+            <ReadingHistory />
         </ProtectedRoute>
     }
 />
@@ -122,6 +134,7 @@ element={
             </Routes>
 
         </BrowserRouter>
+        </GoogleOAuthProvider>
 
     </StrictMode>
 

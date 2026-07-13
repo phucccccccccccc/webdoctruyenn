@@ -52,6 +52,7 @@ export const updateReadingHistory = (req, res) => {
             last_position
         )
         VALUES (?,?,?,?)
+
         ON DUPLICATE KEY UPDATE
 
             chapter_number = VALUES(chapter_number),
@@ -69,13 +70,13 @@ export const updateReadingHistory = (req, res) => {
             chapter_number,
             last_position
         ],
-        (err)=>{
+        (err) => {
 
-            if(err)
+            if (err)
                 return res.status(500).json(err);
 
             res.json({
-                message:"Đã lưu lịch sử đọc"
+                message: "Đã lưu lịch sử đọc"
             });
 
         }

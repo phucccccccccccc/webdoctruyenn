@@ -1,12 +1,16 @@
-import { Navbar, Nav, Container, Button } from "react-bootstrap";
+import { Navbar, Nav, Container, Button, Form } from "react-bootstrap";
 import { FaSearch } from "react-icons/fa";
 import { useNavigate, Link } from "react-router-dom";
-
+import { useState } from "react";
 export default function UserHeader() {
+    
+const navigate = useNavigate();
 
-    const navigate = useNavigate();
+const [search, setSearch] = useState("");
 
-const user = JSON.parse(localStorage.getItem("user"));
+const user = JSON.parse(localStorage.getItem("user"));  
+
+
 
 const handleLogout = () => {
 
@@ -15,6 +19,34 @@ const handleLogout = () => {
     navigate("/");
 
 };
+const handleSearch = (e) => {
+
+    e.preventDefault();
+
+    if (search.trim() === "") {
+
+        navigate("/books");
+
+        return;
+
+    }
+
+    navigate(`/books?search=${encodeURIComponent(search)}`);
+
+};
+const handleKeyDown = (e) => {
+
+    if (e.key === "Enter") {
+
+        e.preventDefault();
+
+        handleSearch(e);
+
+    }
+
+};
+
+
 return (
 
     <Navbar
@@ -57,16 +89,36 @@ return (
                     </Nav.Link>
 
                     <Nav.Link as={Link} to="/categories">
-                        Thể loại
+                        Nạp Tiền
                     </Nav.Link>
 
                 </Nav>
+                
 
                 <Nav className="align-items-center">
 
-                    <Nav.Link>
-                        <FaSearch size={20} />
-                    </Nav.Link>
+    <Form className="d-flex me-3">
+
+        <Form.Control
+            type="text"
+            placeholder="Tìm sách..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            onKeyDown={handleKeyDown}
+            style={{
+                width: "220px",
+                
+            }}
+        />
+
+        <Button
+            variant="success"
+            onClick={handleSearch}
+        >
+            <FaSearch />
+        </Button>
+
+    </Form>
 
 
                     {
