@@ -64,7 +64,7 @@ navigate("/login");
       className="border rounded p-4"
       style={{ width: "400px" }}
     >
-      <h1 className="mb-4">Đăng Ký Tài Khoảng</h1>
+      <h1 className="mb-4">Đăng Ký Tài Khoản</h1>
 
       <div className="mb-3">
         <label htmlFor="username" className="form-label">

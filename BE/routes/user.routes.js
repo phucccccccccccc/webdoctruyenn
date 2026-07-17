@@ -1,5 +1,5 @@
 import express from "express";
-import { getUser,getPurchasedBooks,updateReadingHistory,getReadingHistory } from "../controllers/user.controller.js";
+import { getUser,getPurchasedBooks,updateReadingHistory,getReadingHistory,getProfile } from "../controllers/user.controller.js";
 import { verifyToken } from "../middlewares/auth.middleware.js";
 
 const router =express.Router();
@@ -16,5 +16,10 @@ router.get(
     "/history",
     verifyToken,
     updateReadingHistory
+);
+router.get(
+    "/profile",
+    verifyToken,
+    getProfile
 );
 export default router;

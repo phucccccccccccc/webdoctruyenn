@@ -1,19 +1,28 @@
-import { Navbar, Nav, Container, Button, Form } from "react-bootstrap";
-import { FaSearch } from "react-icons/fa";
+import {
+    Navbar,
+    Nav,
+    Container,
+    Button,
+    Form,
+    Dropdown,
+    Image
+} from "react-bootstrap";import { FaSearch } from "react-icons/fa";
 import { useNavigate, Link } from "react-router-dom";
-import { useState } from "react";
+import { useState,useEffect } from "react";
+import api from "../api/api";
 export default function UserHeader() {
     
 const navigate = useNavigate();
 
 const [search, setSearch] = useState("");
 
+const [coin, setCoin] = useState(0);
+
 const user = JSON.parse(localStorage.getItem("user"));  
 
 
 
 const handleLogout = () => {
-
     localStorage.removeItem("user");
 
     navigate("/");
@@ -45,6 +54,19 @@ const handleKeyDown = (e) => {
     }
 
 };
+useEffect(() => {
+
+    if (!user) return;
+
+    api.get("/user/profile")
+        .then((res) => {
+
+            setCoin(res.data.total_coin);
+
+        })
+        .catch(console.log);
+
+}, []);
 
 
 return (
@@ -121,21 +143,72 @@ return (
     </Form>
 
 
-                    {
-    user ? (    
+     {
+    user ? (
         <>
-            <span className="text-white me-3">
-    Xin chào, <b>
-        {user.username.charAt(0).toUpperCase() + user.username.slice(1)}
-    </b>
-</span>
-            <Button
-                variant="outline-danger"
-                className="rounded-pill"
-                onClick={handleLogout}
-            >
-                Đăng xuất
-            </Button>
+            <span className="text-warning fw-bold me-4">
+                💰 {coin} Coin
+            </span>
+
+            <Dropdown align="end">
+
+                <Dropdown.Toggle
+                    variant="dark"
+                    className="border-0 d-flex align-items-center"
+                >
+
+                    <Image
+                        src={
+                            user.avatar
+                                ? user.avatar
+                                : "https://ui-avatars.com/api/?name=" +
+                                  encodeURIComponent(user.username)
+                        }
+                        roundedCircle
+                        width={38}
+                        height={38}
+                        className="me-2"
+                    />
+
+                    <span
+                        style={{
+                            maxWidth: "150px",
+                            overflow: "hidden",
+                            whiteSpace: "nowrap",
+                            textOverflow: "ellipsis"
+                        }}
+                    >
+                        {user.username}
+                    </span>
+
+                </Dropdown.Toggle>
+
+                <Dropdown.Menu>
+
+                    <Dropdown.Item as={Link} to="/profile">
+                        Hồ sơ
+                    </Dropdown.Item>
+
+                    <Dropdown.Item as={Link} to="/wallet">
+                        Ví của tôi
+                    </Dropdown.Item>
+
+                    <Dropdown.Item as={Link} to="/transactions">
+                        Lịch sử giao dịch
+                    </Dropdown.Item>
+
+                    <Dropdown.Divider />
+
+                    <Dropdown.Item
+                        className="text-danger"
+                        onClick={handleLogout}
+                    >
+                        Đăng xuất
+                    </Dropdown.Item>
+
+                </Dropdown.Menu>
+
+            </Dropdown>
         </>
     ) : (
         <>

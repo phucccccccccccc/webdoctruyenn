@@ -18,7 +18,7 @@ export default function Membership() {
     useEffect(() => {
 
         api
-            .get(`/user/books/${user.id}`)
+            .get("/user/books")
             .then((res) => {
 
                 setBooks(res.data);

@@ -10,6 +10,11 @@ import {
 } from "react-router-dom";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 
+import Profile from "./pages/user/Profile";
+import Wallet from "./pages/user/Wallet";
+import Transactions from "./pages/user/Transactions";
+import Topup from "./pages/user/Topup";
+
 import AdminRoute from './components/AdminRoute';
 import ProtectedRoute from './components/ProtectedRoute';
 import Register from "./pages/register"; 
@@ -19,6 +24,7 @@ import Home from "./pages/user/Home";
 import Books from "./pages/user/Books";
 import BookDetail from "./pages/user/BookDetail";
 import Reader from "./pages/user/ReadBook";
+import Chapters from "./pages/Dashboard/Chapters/Chapters";
 // import BookDetail from "./pages/user/BookDetail";
 
 import DashBoard from "./pages/Dashboard/Dashboard";
@@ -85,13 +91,35 @@ element={
         </ProtectedRoute>
     }
 />
+
+                {/* thong tin user */}
+
+<Route
+    path="/profile"
+    element={<Profile />}
+/>
+<Route
+    path="/wallet"
+    element={<Wallet />}
+/>
+<Route
+    path="/transactions"
+    element={<Transactions />}
+/>
+<Route path="/buy" 
+element={<Topup />} />
                     
                 </Route>
+                
 
                 {/* ADMIN */}
                 <Route
     path="/login"
     element={<Login />}
+/>
+<Route
+    path="/dashboard/books/:bookId/chapters"
+    element={<Chapters />}
 />
 
 <Route
@@ -128,6 +156,10 @@ element={
                     <Route
                         path="transactions"
                         element={<TransactionDB />}
+                    />
+                    <Route
+                        path="/dashboard/books/:bookId/chapters"
+                        element={<Chapters />}
                     />
                     
                 </Route>

@@ -18,7 +18,7 @@ export default function ReadingHistory() {
     useEffect(() => {
 
         api
-            .get(`/user/history/${user.id}`)
+            .get(`/user/history`)
             .then((res) => {
 
                 setBooks(res.data);

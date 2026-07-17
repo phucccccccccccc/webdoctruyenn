@@ -1,17 +1,29 @@
 import {db} from "../config/config.js";
 
-export const getTransactions =(req,res) =>{
-    const sql=`select u.username,t.amount,t.type,t.description,t.created_at
-            from transactions t join users u on t.user_id=u.id
-            `;
-    db.query(sql,(err,result)=>{
-        if(err){
-            console.log(err);
-            return res.status(500).json({
-                message:"Loi"
-            });
-        }
+
+export const getTransactions = (req, res) => {
+
+    const userId = req.user.id;
+
+    const sql = `
+        SELECT
+            id,
+            amount,
+            type,
+            description,
+            created_at
+        FROM transactions
+        WHERE user_id = ?
+        ORDER BY created_at DESC
+    `;
+
+    db.query(sql, [userId], (err, result) => {
+
+        if (err)
+            return res.status(500).json(err);
+
         res.json(result);
 
     });
-}
+
+};

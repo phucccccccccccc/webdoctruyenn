@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../../api/api";
+import BookForm from "../../components/books/BookForm";
+import { Link } from "react-router-dom";
 import {
     Table,
     Button,
@@ -13,161 +15,249 @@ import {
 export default function Books() {
 
     const [books, setBooks] = useState([]);
+    const [categories, setCategories] = useState([]);
+
+    const [show, setShow] = useState(false);
+
+    const [editingBook, setEditingBook] = useState(null);
+
+    const loadBooks = async () => {
+
+        try {
+
+            const [bookRes, categoryRes] = await Promise.all([
+                api.get("/books"),
+                api.get("/category")
+            ]);
+
+            setBooks(bookRes.data);
+            setCategories(categoryRes.data);
+
+        } catch (err) {
+
+            console.log(err);
+
+        }
+
+    };
 
     useEffect(() => {
 
-        axios
-            .get("http://localhost:5000/api/books")
-            .then((res) => {
-
-                setBooks(res.data);
-
-            })
-            .catch((err) => {
-
-                console.log(err);
-
-            });
+        loadBooks();
 
     }, []);
 
+    const handleClose = () => {
+
+        setShow(false);
+
+        setEditingBook(null);
+
+    };
+
+    const handleEdit = async (id) => {
+
+        try {
+
+            const res = await api.get(`/books/${id}`);
+
+            setEditingBook(res.data);
+
+            setShow(true);
+
+        } catch (err) {
+
+            console.log(err);
+
+        }
+
+    };
+
+    const handleDelete = async (id) => {
+
+        if (!window.confirm("Bạn muốn xóa truyện này?"))
+            return;
+
+        try {
+
+            await api.delete(`/books/${id}`);
+
+            loadBooks();
+
+        } catch (err) {
+
+            console.log(err);
+
+        }
+
+    };
+
     return (
 
-        <Card className="shadow">
+        <>
 
-            <Card.Body>
+            <Card className="shadow">
 
-                <Row className="mb-4">
+                <Card.Body>
 
-                    <Col>
+                    <Row className="mb-4">
 
-                        <h3>Quản lý sách</h3>
+                        <Col>
 
-                    </Col>
+                            <h3>Quản lý Truyện</h3>
 
-                    <Col className="text-end">
+                        </Col>
 
-                        <Button variant="primary">
+                        <Col className="text-end">
 
-                            + Thêm sách
+                            <Button
+                                variant="primary"
+                                onClick={() => {
 
-                        </Button>
+                                    setEditingBook(null);
 
-                    </Col>
+                                    setShow(true);
 
-                </Row>
+                                }}
+                            >
+                                + Thêm Truyện
+                            </Button>
 
-                <Row className="mb-3">
+                        </Col>
 
-                    <Col md={4}>
+                    </Row>
 
-                        <Form.Control
-                            placeholder="Tìm tên sách..."
-                        />
+                    <Row className="mb-3">
 
-                    </Col>
+                        <Col md={4}>
 
-                    <Col>
+                            <Form.Control
+                                placeholder="Tìm tên truyện..."
+                            />
 
-                        <Button>
+                        </Col>
 
-                            Tìm kiếm
+                        <Col>
 
-                        </Button>
+                            <Button>
 
-                    </Col>
+                                Tìm kiếm
 
-                </Row>
+                            </Button>
 
-                <Table bordered hover responsive>
+                        </Col>
 
-                    <thead>
+                    </Row>
 
-                        <tr>
+                    <Table bordered hover responsive>
 
-                            <th>ID</th>
+                        <thead>
 
-                            <th>Ảnh</th>
+                            <tr>
 
-                            <th>Tên sách</th>
+                                <th>ID</th>
 
-                            <th>Tác giả</th>
+                                <th>Ảnh</th>
 
-                            <th>Coin</th>
+                                <th>Tên truyện</th>
 
-                            <th>Thao tác</th>
+                                <th>Tác giả</th>
 
-                        </tr>
+                                <th>Coin</th>
 
-                    </thead>
+                                <th>Thao tác</th>
 
-                    <tbody>
+                            </tr>
 
-                        {
+                        </thead>
 
-                            books.map((book) => (
+                        <tbody>
 
-                                <tr key={book.id}>
+                            {
 
-                                    <td>{book.id}</td>
+                                books.map((book) => (
 
-                                    <td>
+                                    <tr key={book.id}>
 
-                                        <Image
-                                            src={`http://localhost:5000/uploads/${book.cover_image}`}
-                                            width={60}
-                                            height={80}
-                                            rounded
-                                        />
+                                        <td>{book.id}</td>
 
-                                    </td>
+                                        <td>
 
-                                    <td>{book.title}</td>
+                                            <Image
+                                                src={`http://localhost:5000/uploads/${book.cover_image}`}
+                                                width={60}
+                                                height={80}
+                                                rounded
+                                            />
 
-                                    <td>{book.author}</td>
+                                        </td>
 
-                                    <td>{book.coin_price}</td>
+                                        <td>{book.title}</td>
 
-                                    <td>
+                                        <td>{book.author}</td>
 
-                                        <Button
-                                            size="sm"
-                                            variant="warning"
-                                            className="me-2"
-                                        >
-                                            Sửa
-                                        </Button>
+                                        <td>{book.coin_price}</td>
 
-                                        <Button
-                                            size="sm"
-                                            variant="danger"
-                                            className="me-2"
-                                        >
-                                            Xóa
-                                        </Button>
+                                        <td>
 
-                                        <Button
-                                            size="sm"
-                                            variant="success"
-                                        >
-                                            Chương
-                                        </Button>
+                                            <Button
+                                                size="sm"
+                                                variant="warning"
+                                                className="me-2"
+                                                onClick={() => handleEdit(book.id)}
+                                            >
+                                                Sửa
+                                            </Button>
 
-                                    </td>
+                                            <Button
+                                                size="sm"
+                                                variant="danger"
+                                                className="me-2"
+                                                onClick={() => handleDelete(book.id)}
+                                            >
+                                                Xóa
+                                            </Button>
 
-                                </tr>
+                                            <Button
+                                                as={Link}
+                                                to={`/dashboard/books/${book.id}/chapters`}
+                                                variant="info"
+                                                size="sm"
+                                            >
+                                                Chương
+                                            </Button>
 
-                            ))
+                                        </td>
 
-                        }
+                                    </tr>
 
-                    </tbody>
+                                ))
 
-                </Table>
+                            }
 
-            </Card.Body>
+                        </tbody>
 
-        </Card>
+                    </Table>
+
+                </Card.Body>
+
+            </Card>
+
+            <BookForm
+
+                show={show}
+
+                onHide={handleClose}
+
+                categories={categories}
+
+                editingBook={editingBook}
+
+                loadBooks={loadBooks}
+
+            />
+
+        </>
 
     );
 

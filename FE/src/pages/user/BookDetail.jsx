@@ -25,7 +25,26 @@ export default function BookDetail(){
 
     const [book,setBook]=useState({});
     const [chapters,setChapters]=useState([]);
+    const buyBook = () => {
 
+    api.post(
+        "/books/buy",
+        {
+            book_id: book.id
+        }
+    )
+    .then(res => {
+
+        alert(res.data.message);
+
+    })
+    .catch(err => {
+
+        alert(err.response.data.message);
+
+    });
+
+};
     useEffect(()=>{
 
         api.get(`/books/${id}`)
@@ -150,10 +169,11 @@ export default function BookDetail(){
                         Đọc ngay
                     </Link>
 
-                    <Button variant="warning">
-
-                        Mua bằng Coin
-
+                    <Button
+                        variant="warning"
+                        onClick={buyBook}
+                    >
+                        Mua ngay
                     </Button>
 
                 </Col>
