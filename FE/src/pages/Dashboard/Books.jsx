@@ -172,16 +172,6 @@ const filteredBooks = books.filter((book) => {
 
                         </Col>
 
-                        <Col>
-
-                            <Button
-                                variant="primary"
-                                onClick={() => {}}
-                            >
-                                Tìm kiếm
-                            </Button>
-
-                        </Col>
 
                     </Row>
 

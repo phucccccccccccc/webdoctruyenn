@@ -190,30 +190,59 @@ return (
 
                 </Dropdown.Toggle>
 
-                <Dropdown.Menu>
+              <Dropdown.Menu>
 
-                    <Dropdown.Item as={Link} to="/profile">
-                        Hồ sơ
-                    </Dropdown.Item>
+    <Dropdown.Item
+        as={Link}
+        to="/profile"
+    >
+        Hồ sơ
+    </Dropdown.Item>
 
-                    <Dropdown.Item as={Link} to="/wallet">
-                        Ví của tôi
-                    </Dropdown.Item>
+    <Dropdown.Item
+        as={Link}
+        to="/wallet"
+    >
+        Ví của tôi
+    </Dropdown.Item>
 
-                    <Dropdown.Item as={Link} to="/transactions">
-                        Lịch sử giao dịch
-                    </Dropdown.Item>
+    <Dropdown.Item
+        as={Link}
+        to="/transactions"
+    >
+        Lịch sử giao dịch
+    </Dropdown.Item>
 
-                    <Dropdown.Divider />
+    {
+        user.role === "admin" && (
 
-                    <Dropdown.Item
-                        className="text-danger"
-                        onClick={handleLogout}
-                    >
-                        Đăng xuất
-                    </Dropdown.Item>
+            <>
 
-                </Dropdown.Menu>
+                <Dropdown.Divider />
+
+                <Dropdown.Item
+                    as={Link}
+                    to="/dashboard"
+                    className="text-primary fw-bold"
+                >
+                    🛠 Quản lý hệ thống
+                </Dropdown.Item>
+
+            </>
+
+        )
+    }
+
+    <Dropdown.Divider />
+
+    <Dropdown.Item
+        className="text-danger"
+        onClick={handleLogout}
+    >
+        Đăng xuất
+    </Dropdown.Item>
+
+</Dropdown.Menu>
 
             </Dropdown>
         </>

@@ -8,13 +8,14 @@ import {
     Image,
     Card
 } from "react-bootstrap";
-import axios from "axios";
+import api from "../../api/api";
 
 export default function User(){
     const [users,setUsers]=useState([]);
+    const [search, setSearch] = useState("");
 
     useEffect(() =>{
-        axios.get("http://localhost:5000/api/user").then((res)=>{
+        api.get("/user").then((res)=>{
             setUsers(res.data);
         }).catch((err) =>{
             console.log(err);
@@ -22,6 +23,56 @@ export default function User(){
 
 
     },[]);
+    const loadUsers = () => {
+
+    api.get("/user")
+        .then((res) => {
+
+            setUsers(res.data);
+
+        })
+        .catch(console.log);
+
+};
+const removeVietnameseTones = (str) => {
+
+    return (str || "")
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/đ/g, "d")
+        .replace(/Đ/g, "D")
+        .toLowerCase();
+
+};
+const filteredUsers = users.filter((user) => {
+
+    const keyword = removeVietnameseTones(search)
+        .trim()
+        .split(/\s+/);
+
+    const username = removeVietnameseTones(user.username);
+
+    const email = removeVietnameseTones(user.email);
+
+    const role = removeVietnameseTones(user.role);
+
+    return keyword.every(word =>
+
+        username.includes(word) ||
+
+        email.includes(word) ||
+
+        role.includes(word)
+
+    );
+
+});
+
+useEffect(() => {
+
+    loadUsers();
+
+}, []);
     return (
         <Card className="shadow">
             <Card.Body>
@@ -30,22 +81,16 @@ export default function User(){
                    <h3> Quản Lý Tài Khoảng</h3>
                     </Col>
 
-                    <Col className="text-end">
-                    <Button variant="primary">
-                    +Thêm Tài Khoảng
-                    </Button>
-                    </Col>
-
                 </Row>
 
                 <Row className="mb-3">
-                    <Col className="md-4">
-                        <Form.Control placeholder="Tìm Tài Khoảng..."/>
-                    </Col>
-                    <Col> 
-                        <Button variant="primary">
-                            Tìm Kiếm
-                        </Button>
+                <Col className='mb-4'>
+                    
+                        <Form.Control
+                        placeholder="Tìm username hoặc email..."
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                    />
 
                     </Col>
                 </Row>
@@ -58,40 +103,19 @@ export default function User(){
                         <th>Email</th>
                         <th>Role</th>
                         <th>Thời Gian Tạo</th>
-                        <th>Thao tác</th>
                         
                         </tr>
                     </thead>
                     <tbody>
                         {
-                            users.map((user) => (
+                            filteredUsers.map((user) => (
                                 <tr key={user.id}>
                                     <td>{user.id}</td>
                                     <td>{user.username}</td>
                                     <td>{user.email}</td>
                                     <td>{user.role}</td>
                                     <td>{new Date(user.created_at).toLocaleDateString("vi-VN")}</td>
-                                     <td>
-
-                                        <Button
-                                            size="sm"
-                                            variant="warning"
-                                            className="me-2"
-                                        >
-                                            Sửa
-                                        </Button>
-
-                                        <Button
-                                            size="sm"
-                                            variant="danger"
-                                            className="me-2"
-                                        >
-                                            Xóa
-                                        </Button>
-
-                                       
-
-                                    </td>
+                                     
 
                                 </tr>
 

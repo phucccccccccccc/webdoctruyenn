@@ -162,19 +162,36 @@ export default function Categories() {
     // Tìm kiếm
     // =====================
 
-    const filteredCategories = categories.filter((cate) => {
+const removeVietnameseTones = (str) => {
 
-        const keyword = search.toLowerCase();
+    return str
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/đ/g, "d")
+        .replace(/Đ/g, "D")
+        .toLowerCase();
 
-        return (
+};
 
-            cate.name.toLowerCase().includes(keyword) ||
+const filteredCategories = categories.filter((cate) => {
 
-            cate.description.toLowerCase().includes(keyword)
+    const keyword = removeVietnameseTones(search)
+        .trim()
+        .split(/\s+/);
 
-        );
+    const name = removeVietnameseTones(cate.name);
 
-    });
+    const description = removeVietnameseTones(cate.description || "");
+
+    return keyword.every(word =>
+
+        name.includes(word) ||
+
+        description.includes(word)
+
+    );
+
+});
 
     return (
 
@@ -221,16 +238,6 @@ export default function Categories() {
 
                         </Col>
 
-                        <Col>
-
-                            <Button
-                                variant="primary"
-                                onClick={() => {}}
-                            >
-                                Tìm kiếm
-                            </Button>
-
-                        </Col>
 
                     </Row>
 
