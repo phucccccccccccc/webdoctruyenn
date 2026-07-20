@@ -1,7 +1,9 @@
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+
 import api from "../../api/api";
-import { useParams } from "react-router-dom";
-import { Link } from "react-router-dom";
+
+import { toast } from "react-toastify";
 
 import {
     Container,
@@ -9,7 +11,8 @@ import {
     Col,
     Card,
     Button,
-    ListGroup
+    ListGroup,
+    Modal
 } from "react-bootstrap";
 
 import {
@@ -21,28 +24,55 @@ import {
 
 export default function BookDetail(){
 
+    const navigate = useNavigate();
+
+    const [selectedBook, setSelectedBook] = useState(null);
+
+    const [showBuyModal, setShowBuyModal] = useState(false);
+
+    const [showCoinModal, setShowCoinModal] = useState(false);
+
     const { id } = useParams();
 
-    const [book,setBook]=useState({});
-    const [chapters,setChapters]=useState([]);
-    const buyBook = () => {
+    const [book, setBook] = useState({});
 
-    api.post(
-        "/books/buy",
-        {
-            book_id: book.id
+    const [chapters, setChapters] = useState([]);
+    
+    const handleRead = async () => {
+
+    try {
+
+        await api.get(`/books/${book.id}/chapter/1`);
+
+        navigate(`/books/${book.id}/chapter/1`);
+
+    } catch (err) {
+
+        if (err.response?.data?.code === "BOOK_NOT_PURCHASED") {
+
+            setSelectedBook({
+
+                ...book,
+
+                coin_price: err.response.data.coin_price
+
+            });
+
+            setShowBuyModal(true);
+
+            return;
+
         }
-    )
-    .then(res => {
 
-        alert(res.data.message);
+        toast.error(
 
-    })
-    .catch(err => {
+            err.response?.data?.message ||
 
-        alert(err.response.data.message);
+            "Có lỗi xảy ra"
 
-    });
+        );
+
+    }
 
 };
     useEffect(()=>{
@@ -62,6 +92,37 @@ export default function BookDetail(){
         });
 
     },[id]);
+
+const handleBuy = async () => {
+
+    try {
+
+        const res = await api.post("/books/buy", {
+
+            book_id: selectedBook.id
+
+        });
+
+        toast.success(res.data.message);
+
+        setShowBuyModal(false);
+
+        navigate(`/books/${selectedBook.id}/chapter/1`);
+
+    } catch (err) {
+
+        if (err.response?.data?.message?.includes("Không đủ")) {
+
+    setShowBuyModal(false);
+
+    setShowCoinModal(true);
+
+    return;
+
+}
+    }
+
+};
 
     return(
 
@@ -161,20 +222,14 @@ export default function BookDetail(){
 
                   
 
-                    <Link
-                        to={`/books/${book.id}/chapter/1`}
-                        className="btn btn-success me-2"
-                    >
-                    <FaBookOpen className="me-2"/>
-                        Đọc ngay
-                    </Link>
-
                     <Button
-                        variant="warning"
-                        onClick={buyBook}
+                        variant="success"
+                        onClick={handleRead}
                     >
-                        Mua ngay
+                        <FaBookOpen className="me-2"/>
+                        Đọc ngay
                     </Button>
+
 
                 </Col>
 
@@ -242,6 +297,94 @@ export default function BookDetail(){
                 </Col>
 
             </Row>
+            <Modal
+    show={showBuyModal}
+    onHide={() => setShowBuyModal(false)}
+>
+
+    <Modal.Header closeButton>
+
+        <Modal.Title>
+
+           Bạn chưa mua sách
+
+        </Modal.Title>
+
+    </Modal.Header>
+
+    <Modal.Body>
+
+        Bạn cần mua cuốn sách này để đọc.
+
+        <br />
+
+        <b>
+
+            Giá: {selectedBook?.coin_price} Coin
+
+        </b>
+
+    </Modal.Body>
+
+    <Modal.Footer>
+
+        <Button
+            variant="secondary"
+            onClick={() => setShowBuyModal(false)}
+        >
+            Hủy
+        </Button>
+
+        <Button
+            variant="warning"
+            onClick={handleBuy}
+        >
+            Mua ngay
+        </Button>
+
+    </Modal.Footer>
+
+</Modal>
+<Modal
+    show={showCoinModal}
+    onHide={() => setShowCoinModal(false)}
+>
+
+    <Modal.Header closeButton>
+
+        <Modal.Title>
+
+            💰 Không đủ Coin
+
+        </Modal.Title>
+
+    </Modal.Header>
+
+    <Modal.Body>
+
+        Bạn không đủ Coin để mua sách.
+
+    </Modal.Body>
+
+    <Modal.Footer>
+
+        <Button
+            variant="secondary"
+            onClick={() => setShowCoinModal(false)}
+        >
+            Đóng
+        </Button>
+
+        <Button
+            variant="success"
+            onClick={() => navigate("/buy")}
+        >
+            Nạp Coin
+        </Button>
+
+    </Modal.Footer>
+
+</Modal>
 
         </Container>
 

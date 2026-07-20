@@ -117,9 +117,7 @@ return (
                         Sách đã đọc 
                     </Nav.Link>
 
-                    <Nav.Link as={Link} to="/buy">
-                        Nạp Tiền
-                    </Nav.Link>
+                    
 
                 </Nav>
                 
@@ -204,6 +202,12 @@ return (
         to="/wallet"
     >
         Ví của tôi
+    </Dropdown.Item>
+    <Dropdown.Item
+        as={Link}
+        to="/buy"
+    >
+        Nạp tiền
     </Dropdown.Item>
 
     <Dropdown.Item
