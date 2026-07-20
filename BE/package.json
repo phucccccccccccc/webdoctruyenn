@@ -1,4 +1,5 @@
 {
+  "type": "module",
   "dependencies": {
     "bcrypt": "^6.0.0",
     "cors": "^2.8.6",
@@ -9,6 +10,7 @@
     "mammoth": "^1.12.0",
     "multer": "^2.2.0",
     "mysql2": "^3.22.3",
+    "nodemailer": "^6.9.16",
     "sepay-pg-node": "^1.0.0"
   },
   "scripts": {

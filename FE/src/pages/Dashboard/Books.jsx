@@ -21,6 +21,8 @@ export default function Books() {
 
     const [editingBook, setEditingBook] = useState(null);
 
+    const [search, setSearch] = useState("");
+
     const loadBooks = async () => {
 
         try {
@@ -61,6 +63,8 @@ export default function Books() {
 
             const res = await api.get(`/books/${id}`);
 
+            console.log(res.data);
+
             setEditingBook(res.data);
 
             setShow(true);
@@ -91,6 +95,35 @@ export default function Books() {
         }
 
     };
+    const removeVietnameseTones = (str) => {
+
+    return str
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/đ/g, "d")
+        .replace(/Đ/g, "D")
+        .toLowerCase();
+
+};
+const filteredBooks = books.filter((book) => {
+
+    const keyword = removeVietnameseTones(search)
+        .trim()
+        .split(/\s+/);
+
+    const title = removeVietnameseTones(book.title);
+
+    const author = removeVietnameseTones(book.author);
+
+    return keyword.every(word =>
+
+        title.includes(word) ||
+
+        author.includes(word)
+
+    );
+
+});
 
     return (
 
@@ -133,16 +166,19 @@ export default function Books() {
 
                             <Form.Control
                                 placeholder="Tìm tên truyện..."
+                                value={search}
+                                onChange={(e) => setSearch(e.target.value)}
                             />
 
                         </Col>
 
                         <Col>
 
-                            <Button>
-
+                            <Button
+                                variant="primary"
+                                onClick={() => {}}
+                            >
                                 Tìm kiếm
-
                             </Button>
 
                         </Col>
@@ -175,7 +211,7 @@ export default function Books() {
 
                             {
 
-                                books.map((book) => (
+                                filteredBooks.map((book) => (
 
                                     <tr key={book.id}>
 

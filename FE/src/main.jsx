@@ -1,7 +1,9 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-
+import 'react-toastify/dist/ReactToastify.css';
+import { ToastContainer } from 'react-toastify';
 import 'bootstrap/dist/css/bootstrap.min.css';
+
 
 import {
     BrowserRouter,
@@ -9,6 +11,9 @@ import {
     Route
 } from "react-router-dom";
 import { GoogleOAuthProvider } from "@react-oauth/google";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
+import AutoLogout from "./components/AutoLogout";
 
 import Profile from "./pages/user/Profile";
 import Wallet from "./pages/user/Wallet";
@@ -42,7 +47,7 @@ createRoot(document.getElementById('root')).render(
     clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}
 >
         <BrowserRouter>
-
+             <AutoLogout />
             <Routes>
 
                 {/* USER */}
@@ -126,6 +131,15 @@ element={<Topup />} />
     path="/register"
     element={<Register />}
 />
+<Route
+    path="/forgot-password"
+    element={<ForgotPassword />}
+/>
+
+<Route
+    path="/reset-password"
+    element={<ResetPassword />}
+/>
 
                 <Route
 path="/dashboard"
@@ -167,6 +181,12 @@ element={
             </Routes>
 
         </BrowserRouter>
+        <ToastContainer
+            position="top-right"
+            autoClose={3000}
+            theme="colored"
+        />
+       
         </GoogleOAuthProvider>
 
     </StrictMode>

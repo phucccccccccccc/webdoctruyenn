@@ -18,13 +18,20 @@ const [search, setSearch] = useState("");
 
 const [coin, setCoin] = useState(0);
 
-const user = JSON.parse(localStorage.getItem("user"));  
-
+const user =
+    JSON.parse(localStorage.getItem("user")) ||
+    JSON.parse(sessionStorage.getItem("user"));
 
 
 const handleLogout = () => {
-    localStorage.removeItem("user");
+localStorage.removeItem("user");
+localStorage.removeItem("token");
 
+sessionStorage.removeItem("user");
+sessionStorage.removeItem("token");
+
+
+window.location.reload();
     navigate("/");
 
 };
@@ -66,7 +73,7 @@ useEffect(() => {
         })
         .catch(console.log);
 
-}, []);
+}, [user]);
 
 
 return (

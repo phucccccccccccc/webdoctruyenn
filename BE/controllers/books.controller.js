@@ -129,8 +129,11 @@ export const getBookById = (req, res) => {
 
     db.query(sql, [req.params.id], (err, result) => {
 
-        if (err)
+        if (err) {
+
             return res.status(500).json(err);
+
+        }
 
         if (result.length === 0) {
 
@@ -142,6 +145,7 @@ export const getBookById = (req, res) => {
 
         const book = result[0];
 
+        // Chuyển "1,2,5" => [1,2,5]
         book.category_ids = book.category_ids
             ? book.category_ids.split(",").map(Number)
             : [];
@@ -361,7 +365,7 @@ export const getChapter = (req, res) => {
 
             loadChapter();
 
-        });
+        }); 
 
     });
 
@@ -748,6 +752,7 @@ export const buyBook = (req, res) => {
 
 };
 export const updateBook = (req, res) => {
+
     const { id } = req.params;
 
     const {
@@ -757,11 +762,13 @@ export const updateBook = (req, res) => {
         coin_price
     } = req.body;
 
+    const categories = JSON.parse(req.body.categories || "[]");
+
     let cover_image = req.body.old_cover_image;
 
-if (req.file) {
-    cover_image = req.file.filename;
-}
+    if (req.file) {
+        cover_image = req.file.filename;
+    }
 
     const sql = `
         UPDATE books
@@ -776,17 +783,67 @@ if (req.file) {
 
     db.query(
         sql,
-        [title, author, description, coin_price, cover_image, id],
-        (err, result) => {
+        [
+            title,
+            author,
+            description,
+            coin_price,
+            cover_image,
+            id
+        ],
+        (err) => {
+
             if (err) {
                 return res.status(500).json(err);
             }
 
-            res.json({
-                message: "Cập nhật thành công"
-            });
+            // Xóa category cũ
+            db.query(
+                "DELETE FROM book_categories WHERE book_id = ?",
+                [id],
+                (err) => {
+
+                    if (err) {
+                        return res.status(500).json(err);
+                    }
+
+                    // Không chọn category nào
+                    if (categories.length === 0) {
+
+                        return res.json({
+                            message: "Cập nhật thành công"
+                        });
+
+                    }
+
+                    // Thêm category mới
+                    const values = categories.map(categoryId => [
+                        id,
+                        categoryId
+                    ]);
+
+                    db.query(
+                        "INSERT INTO book_categories(book_id, category_id) VALUES ?",
+                        [values],
+                        (err) => {
+
+                            if (err) {
+                                return res.status(500).json(err);
+                            }
+
+                            res.json({
+                                message: "Cập nhật thành công"
+                            });
+
+                        }
+                    );
+
+                }
+            );
+
         }
     );
+
 };
 export const deleteBook = (req, res) => {
     const { id } = req.params;

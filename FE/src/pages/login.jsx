@@ -2,6 +2,7 @@ import { useState } from "react";
 import api from "../api/api";
 import { useNavigate } from "react-router-dom";
 import { GoogleLogin } from "@react-oauth/google";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 export default function Login() {
 
     const navigate = useNavigate();
@@ -13,48 +14,50 @@ export default function Login() {
     const [passwordErr, setPasswordErr] = useState("");
     const [error, setError] = useState("");
 
-const handleGoogleSuccess = async (credentialResponse) => {
+    const [showPassword, setShowPassword] = useState(false);
+    const [remember, setRemember] = useState(false);
 
-    try {
+  const saveLogin = (token, user) => {
 
-        const res = await api.post(
-            "/auth/google",
-            {
+    localStorage.setItem("token", token);
+
+    localStorage.setItem("user", JSON.stringify(user));
+
+};
+
+    const handleGoogleSuccess = async (credentialResponse) => {
+
+        try {
+
+            const res = await api.post("/auth/google", {
                 credential: credentialResponse.credential
+            });
+
+            saveLogin(res.data.token, res.data.user);
+            localStorage.setItem("lastActivity", Date.now());
+            alert("Đăng nhập thành công");
+
+            if (res.data.user.role === "admin") {
+                navigate("/dashboard");
+            } else {
+                navigate("/");
             }
-        );
 
-        localStorage.setItem(
-    "token",
-    res.data.token
-);
+        } catch (err) {
 
-localStorage.setItem(
-    "user",
-    JSON.stringify(res.data.user)
-);
+            console.log(err);
 
-        if (res.data.user.role === "admin") {
-            navigate("/dashboard");
-        } else {
-            navigate("/");
+            setError("Đăng nhập Google thất bại");
+
         }
 
-    } catch (err) {
+    };
 
-        console.log(err);
+    const handleGoogleError = () => {
 
         setError("Đăng nhập Google thất bại");
 
-    }
-
-};
-
-const handleGoogleError = () => {
-
-    console.log("Google Login Failed");
-
-};
+    };
 
     const handleLogin = async (e) => {
 
@@ -80,23 +83,12 @@ const handleGoogleError = () => {
 
         try {
 
-            const res = await api.post(
-                "/auth/login",
-                {
-                    username,
-                    password
-                }
-);
+            const res = await api.post("/auth/login", {
+                username,
+                password
+            });
 
-           localStorage.setItem(
-    "token",
-    res.data.token
-);
-
-localStorage.setItem(
-    "user",
-    JSON.stringify(res.data.user)
-);
+            saveLogin(res.data.token, res.data.user);
 
             alert("Đăng nhập thành công");
 
@@ -110,10 +102,27 @@ localStorage.setItem(
 
             console.log(err);
 
-            if (err.response) {
-                setError(err.response.data.message);
+            if (err.response?.data?.errors) {
+
+                err.response.data.errors.forEach((item) => {
+
+                    if (item.field === "username") {
+                        setUsernameErr(item.message);
+                    }
+
+                    if (item.field === "password") {
+                        setPasswordErr(item.message);
+                    }
+
+                });
+
             } else {
-                setError("Không thể kết nối đến máy chủ.");
+
+                setError(
+                    err.response?.data?.message ||
+                    "Không thể kết nối đến máy chủ."
+                );
+
             }
 
         }
@@ -170,21 +179,37 @@ localStorage.setItem(
 
                                 </div>
 
-                                <div className="mb-3">
+                               <div className="mb-3">
 
                                     <label className="form-label">
                                         Mật khẩu
                                     </label>
 
-                                    <input
-                                        type="password"
-                                        className="form-control"
-                                        value={password}
-                                        onChange={(e) => {
-                                            setPassword(e.target.value);
-                                            setPasswordErr("");
-                                        }}
-                                    />
+                                    <div className="input-group">
+
+                                        <input
+                                            type={showPassword ? "text" : "password"}
+                                            className="form-control"
+                                            value={password}
+                                            onChange={(e) => {
+                                                setPassword(e.target.value);
+                                                setPasswordErr("");
+                                            }}
+                                        />
+
+                                        <button
+                                            type="button"
+                                            className="btn btn-outline-secondary"
+                                            onClick={() => setShowPassword(!showPassword)}
+                                        >
+                                            {
+                                                showPassword
+                                                    ? <FaEyeSlash />
+                                                    : <FaEye />
+                                            }
+                                        </button>
+
+                                    </div>
 
                                     {
                                         passwordErr &&
@@ -195,27 +220,75 @@ localStorage.setItem(
 
                                 </div>
 
-                              
+                                <div className="form-check mb-3">
+
+                                    <input
+                                        className="form-check-input"
+                                        type="checkbox"
+                                        id="remember"
+                                        checked={remember}
+                                        onChange={(e) =>
+                                            setRemember(e.target.checked)
+                                        }
+                                    />
+
+                                    <label
+                                        className="form-check-label"
+                                        htmlFor="remember"
+                                    >
+                                        Ghi nhớ đăng nhập
+                                    </label>
+
+                                </div>
+
+                                <div className="text-end mb-3">
+
+                                    <span
+                                        className="text-primary"
+                                        style={{ cursor: "pointer" }}
+                                        onClick={() =>
+                                            navigate("/forgot-password")
+                                        }
+                                    >
+                                        Quên mật khẩu?
+                                    </span>
+
+                                </div>
+
                                 <button
-    type="submit"
-    className="btn btn-primary w-100"
->
-    Đăng nhập
-</button>
+                                    type="submit"
+                                    className="btn btn-primary w-100"
+                                >
+                                    Đăng nhập
+                                </button>
 
-<div className="text-center my-3">
-    <hr />
-    <span>Hoặc</span>
-</div>
+                                <div className="text-center my-3">
+                                    <hr />
+                                    <span>Hoặc</span>
+                                </div>
 
-<div className="d-flex justify-content-center">
+                                <div className="d-flex justify-content-center">
 
-    <GoogleLogin
-        onSuccess={handleGoogleSuccess}
-        onError={handleGoogleError}
-    />
+                                    <GoogleLogin
+                                        onSuccess={handleGoogleSuccess}
+                                        onError={handleGoogleError}
+                                    />
 
-</div>
+                                </div>
+
+                                <div className="text-center mt-4">
+
+                                    Chưa có tài khoản?{" "}
+
+                                    <span
+                                        className="text-primary"
+                                        style={{ cursor: "pointer" }}
+                                        onClick={() => navigate("/register")}
+                                    >
+                                        Đăng ký ngay
+                                    </span>
+
+                                </div>
 
                             </form>
 

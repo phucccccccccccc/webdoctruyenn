@@ -175,7 +175,7 @@ useEffect(() => {
     };
 
 
-if (!chapter&&!notPurchased) {
+if (!chapter&&!notPurchased) {  
 
     return (
 
