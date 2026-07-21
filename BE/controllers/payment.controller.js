@@ -95,12 +95,12 @@ export const webhook = (req, res) => {
 
     const {
 
-        order_invoice_number,
-        payment_status
+        content,
+        transferAmount
 
     } = req.body;
 
-    if (payment_status !== "PAID") {
+    if (!content) {
 
         return res.sendStatus(200);
 
@@ -109,12 +109,23 @@ export const webhook = (req, res) => {
     const sql = `
         SELECT *
         FROM payments
-        WHERE order_code = ?
+        WHERE ? LIKE CONCAT('%', order_code, '%')
+        LIMIT 1
     `;
 
-    db.query(sql, [order_invoice_number], (err, result) => {
+    db.query(sql, [content], (err, result) => {
 
-        if (err || result.length === 0) {
+        if (err) {
+
+            console.log(err);
+
+            return res.sendStatus(500);
+
+        }
+
+        if (result.length === 0) {
+
+            console.log("Không tìm thấy đơn hàng");
 
             return res.sendStatus(200);
 
@@ -128,24 +139,46 @@ export const webhook = (req, res) => {
 
         }
 
+        if (Number(transferAmount) < Number(payment.amount)) {
+
+            console.log("Thanh toán thiếu tiền");
+
+            return res.sendStatus(200);
+
+        }
+
         db.query(
-            `UPDATE payments
-             SET status='success'
-             WHERE id=?`,
+            `
+            UPDATE payments
+            SET status='success'
+            WHERE id=?
+            `,
             [payment.id]
         );
 
         db.query(
-            `UPDATE users
-             SET total_coin = total_coin + ?
-             WHERE id=?`,
-            [payment.coin, payment.user_id]
+            `
+            UPDATE users
+            SET total_coin = total_coin + ?
+            WHERE id=?
+            `,
+            [
+                payment.coin,
+                payment.user_id
+            ]
         );
 
         db.query(
-            `INSERT INTO transactions
-            (user_id,amount,type,description)
-            VALUES (?,?,?,?)`,
+            `
+            INSERT INTO transactions
+            (
+                user_id,
+                amount,
+                type,
+                description
+            )
+            VALUES (?,?,?,?)
+            `,
             [
                 payment.user_id,
                 payment.coin,
@@ -153,6 +186,8 @@ export const webhook = (req, res) => {
                 `Nạp ${payment.coin} Coin qua SePay`
             ]
         );
+
+        console.log("Nạp coin thành công");
 
         res.sendStatus(200);
 
