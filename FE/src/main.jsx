@@ -29,7 +29,7 @@ import Home from "./pages/user/Home";
 import Books from "./pages/user/Books";
 import BookDetail from "./pages/user/BookDetail";
 import Reader from "./pages/user/ReadBook";
-import Chapters from "./pages/Dashboard/Chapters/Chapters";
+import Chapters from "./pages/Dashboard/chapters/Chapters";
 import Categories from "./pages/user/Categories";
 // import BookDetail from "./pages/user/BookDetail";
 
@@ -74,6 +74,10 @@ createRoot(document.getElementById('root')).render(
                         path="/categories"
                         element={<Categories />}
                     />
+                                    <Route
+                    path="/books/category/:id"
+                    element={<BooksByCategory />}
+                />
                     <Route
                         path="books/:bookId/chapter/:chapterNumber"
                         element={
