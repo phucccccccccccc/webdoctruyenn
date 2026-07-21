@@ -51,7 +51,7 @@ export const getFeaturedBooks = (req, res) => {
             likes
         FROM books
         ORDER BY views DESC
-        LIMIT 8
+        LIMIT 10
     `;
 
     db.query(sql, (err, result) => {
@@ -87,7 +87,7 @@ export const getNewBooks = (req, res) => {
             created_at
         FROM books
         ORDER BY created_at DESC
-        LIMIT 8
+        LIMIT 10
     `;
 
     db.query(sql, (err, result) => {
