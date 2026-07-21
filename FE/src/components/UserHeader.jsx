@@ -140,7 +140,7 @@ return (
                                 <NavDropdown.Item
                                     key={category.id}
                                     as={Link}
-                                    to={`/books/category/${category.id}`}
+                                    to={`/books?category=${category.id}`}
                                 >
                                     {category.name}
                                 </NavDropdown.Item>

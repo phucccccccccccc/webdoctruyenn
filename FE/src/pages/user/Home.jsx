@@ -136,13 +136,6 @@ const renderBooks = (books) => (
 
                             </p>
 
-                            <p>
-
-                                <FaHeart className="text-danger me-2"/>
-
-                                {book.favorites}
-
-                            </p>
 
                             <Link
                                 to={`/books/${book.id}`}

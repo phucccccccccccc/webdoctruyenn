@@ -17,7 +17,8 @@ import {
 } from "react-bootstrap";
 import {
     Link,
-    useSearchParams
+    useSearchParams,
+    useNavigate 
 } from "react-router-dom";
 export default function Books() {
 
@@ -29,7 +30,10 @@ export default function Books() {
 
     const keyword = searchParams.get("search") || "";
     
-
+    const navigate = useNavigate();
+    
+    const categoryId = searchParams.get("category") || "";
+    
     // Lấy tất cả sách
     const loadBooks = () => {
 
@@ -64,11 +68,21 @@ export default function Books() {
 
 useEffect(() => {
 
-    if (keyword.trim() === "") {
+    if (categoryId) {
 
-        loadBooks();
+        api.get(`/books/category/${categoryId}`)
+            .then((res) => {
 
-    } else {
+                setBooks(res.data);
+
+            })
+            .catch(console.log);
+
+        return;
+
+    }
+
+    if (keyword.trim() !== "") {
 
         api.get(`/books/search/${encodeURIComponent(keyword)}`)
             .then((res) => {
@@ -78,29 +92,18 @@ useEffect(() => {
             })
             .catch(console.log);
 
+        return;
+
     }
 
-}, [keyword]);
+    loadBooks();
+
+}, [keyword, categoryId]);
 
 
 
     // Lọc theo thể loại
-    const handleCategory = (id) => {
-
-        if (id === "") {
-            loadBooks();
-            return;
-        }
-
-        api.get(`/books/category/${id}`)
-            .then((res) => {
-                setBooks(res.data);
-            })
-            .catch((err) => {
-                console.log(err);
-            });
-
-    };
+   
 
     return (
 
@@ -117,8 +120,21 @@ useEffect(() => {
                 <Col md={4}>
 
                     <Form.Select
-                        onChange={(e) => handleCategory(e.target.value)}
-                    >
+                            value={categoryId}
+                            onChange={(e) => {
+
+                                if (e.target.value === "") {
+
+                                    navigate("/books");
+
+                                } else {
+
+                                    navigate(`/books?category=${e.target.value}`);
+
+                                }
+
+                            }}
+                        >
 
                         <option value="">
                             Tất cả thể loại
@@ -160,53 +176,62 @@ useEffect(() => {
                             key={book.id}
                         >
 
-                            <Card className="h-100 shadow">
+                           <Card className="h-100 shadow-sm d-flex flex-column">
 
-                                <Card.Img
-                                    variant="top"
-                                src={`http://localhost:5000/uploads/${book.cover_image}`}
+                        <Card.Img
+                            variant="top"
+                            src={`http://localhost:5000/uploads/${book.cover_image}`}
+                            style={{
+                                height: "320px",
+                                width: "100%",
+                                objectFit: "contain",
+                                backgroundColor: "#f5f5f5"
+                            }}
+                        />
+
+                        <Card.Body className="d-flex flex-column">
+
+                            <Card.Title
                                 style={{
-                                    height: "320px",
-                                    width: "100%",
-                                    objectFit: "contain",
-                                    backgroundColor: "#f5f5f5"
+                                    minHeight: "48px",
+                                    display: "-webkit-box",
+                                    WebkitLineClamp: 2,
+                                    WebkitBoxOrient: "vertical",
+                                    overflow: "hidden"
                                 }}
-                                />
+                            >
+                                {book.title}
+                            </Card.Title>
 
-                                <Card.Body>
+                            <p>{book.author}</p>
 
-                                    <h5>{book.title}</h5>
+                            <p>
 
-                                    <p className="text-muted">
-                                        {book.author}
-                                    </p>
+                                <FaCoins className="text-warning me-2"/>
 
-                                    <p>
-                                        <FaCoins className="text-warning me-2" />
-                                         {book.coin_price} Coin
-                                    </p>
+                                {book.coin_price} Coin
 
-                                    <p>
-                                    <FaEye className="text-primary me-2" />
+                            </p>
 
-                                         {book.views}
-                                    </p>
+                            <p>
 
-                                    <p>
-                                    <FaHeart className="text-danger me-2" />
-                                         {book.favorites}
-                                    </p>
+                                <FaEye className="text-primary me-2"/>
 
-                                    <Link
-                                        to={`/books/${book.id}`}
-                                        className="btn btn-success w-100"
-                                    >
-                                        Xem chi tiết
-                                    </Link>
+                                {book.views}
 
-                                </Card.Body>    
+                            </p>
 
-                            </Card>
+                           
+
+                            <Link
+                                to={`/books/${book.id}`}
+                                className="btn btn-success w-100 mt-auto"
+                            >
+                                Xem chi tiết
+                            </Link>
+                        </Card.Body>
+
+                    </Card>
 
                         </Col>
 
