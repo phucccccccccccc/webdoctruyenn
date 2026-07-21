@@ -8,8 +8,7 @@ import {
     Button
 } from "react-bootstrap";
 import { Link } from "react-router-dom";
-import { UPLOAD_URL } from "../config";
-
+import { UPLOAD_URL } from "../../config";
 export default function Membership() {
 
     const user = JSON.parse(localStorage.getItem("user"));
