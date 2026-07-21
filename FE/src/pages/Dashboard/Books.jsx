@@ -12,7 +12,6 @@ import {
     Image,
     Card
 } from "react-bootstrap";
-export const UPLOAD_URL = `${API_URL}/uploads`;
 
 export default function Books() {
 
