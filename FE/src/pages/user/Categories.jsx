@@ -24,7 +24,7 @@ export default function Categories() {
         <Container className="py-5">
 
             <h2 className="mb-4 fw-bold">
-                📚 Danh mục sách
+                 Danh mục truyện
             </h2>
 
             <Row>
@@ -53,7 +53,7 @@ export default function Categories() {
                                         to={`/books/category/${category.id}`}
                                         variant="success"
                                     >
-                                        Xem sách
+                                        Xem truyện
                                     </Button>
 
                                 </Card.Body>

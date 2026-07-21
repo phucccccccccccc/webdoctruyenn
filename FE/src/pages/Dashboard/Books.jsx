@@ -166,7 +166,7 @@ const filteredBooks = books.filter((book) => {
                         <Col md={4}>
 
                             <Form.Control
-                                placeholder="Tìm tên truyện..."
+                                placeholder="Tìm tên truyện hoặc tác giả ..."
                                 value={search}
                                 onChange={(e) => setSearch(e.target.value)}
                             />

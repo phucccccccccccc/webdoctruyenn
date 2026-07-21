@@ -155,7 +155,7 @@ const handleBuy = async () => {
 
                     <p>
 
-                        <strong>Thể loại:</strong>
+                        <strong>Thể loại:</strong> 
 
                         {book.categories}
 

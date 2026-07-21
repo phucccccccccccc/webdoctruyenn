@@ -163,7 +163,7 @@ useEffect(() => {
             </Row>
 
             <p>
-                Hiển thị <b>{books.length}</b> cuốn sách
+                Hiển thị <b>{books.length}</b> cuốn truyện
             </p>
 
             <Row>

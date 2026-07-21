@@ -39,7 +39,7 @@ export default function Membership() {
            
 
             <h3 className="text-center text-muted mb-5">
-                Bạn đã sở hữu <strong>{books.length}</strong> cuốn sách
+                Bạn đã sở hữu <strong>{books.length}</strong> cuốn truyện
             </h3>
 
             <Row>
@@ -105,10 +105,10 @@ export default function Membership() {
 
                             <Card className="shadow text-center p-5">
 
-                                <h4>Bạn chưa mua sách nào.</h4>
+                                <h4>Bạn chưa mua truyện nào.</h4>
 
                                 <p className="text-muted">
-                                    Hãy khám phá kho sách của chúng tôi.
+                                    Hãy khám phá kho truyện của chúng tôi.
                                 </p>
 
                                 <Button
@@ -116,7 +116,7 @@ export default function Membership() {
                                     to="/books"
                                     variant="primary"
                                 >
-                                    Khám phá sách
+                                    Khám phá truyện
                                 </Button>
 
                             </Card>

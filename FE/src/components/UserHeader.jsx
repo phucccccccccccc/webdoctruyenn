@@ -103,7 +103,7 @@ return (
                 to="/"
                 className="fw-bold fs-2 text-success"
             >
-                BOOK
+                DOCTRUYEN
             </Navbar.Brand>
 
             <Navbar.Toggle />
@@ -117,7 +117,7 @@ return (
                     </Nav.Link>
 
                     <Nav.Link as={Link} to="/books">
-                        Tất cả sách
+                        Tất cả truyện
                     </Nav.Link>
                      <NavDropdown
                         title="Thể loại"
@@ -128,7 +128,7 @@ return (
                             as={Link}
                             to="/books"
                         >
-                            Tất cả sách
+                            Tất cả truyện
                         </NavDropdown.Item>
 
                         <NavDropdown.Divider />
@@ -152,11 +152,11 @@ return (
                     </NavDropdown>
 
                     <Nav.Link as={Link} to="/membership">
-                        Sách đã mua 
+                        Truyện đã mua 
                     </Nav.Link>
 
                     <Nav.Link as={Link} to="/reading-history">
-                        Sách đã đọc 
+                        Truyện đã đọc 
                     </Nav.Link>
                    
 
@@ -171,7 +171,7 @@ return (
 
         <Form.Control
             type="text"
-            placeholder="Tìm sách..."
+            placeholder="Tìm truyện..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             onKeyDown={handleKeyDown}

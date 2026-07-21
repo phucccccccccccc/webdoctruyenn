@@ -50,13 +50,11 @@ export default function Sidebar() {
                         to="/"
                         className="text-success text-decoration-none"
                     >
-                         BOOK
+                         DOCTRUYEN
                     </Link>
                 </h2>
 
-                <small className="text-secondary">
-                    Admin Dashboard
-                </small>
+                
 
             </div>
 
@@ -80,7 +78,7 @@ export default function Sidebar() {
                     className="sidebar-link"
                 >
                     <FaBook className="me-2" />
-                    Quản lý sách
+                    Quản lý truyện
                 </Nav.Link>
 
                 <Nav.Link

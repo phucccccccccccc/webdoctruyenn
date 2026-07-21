@@ -38,7 +38,7 @@ export default function ReadingHistory() {
         <Container className="py-5">
 
             <h2 className="fw-bold text-center mb-3">
-                 Sách đã đọc
+                 Truyện đã đọc
             </h2>
 
 
@@ -113,14 +113,14 @@ export default function ReadingHistory() {
                                 <h4>Chưa có lịch sử đọc</h4>
 
                                 <p className="text-muted">
-                                    Hãy chọn một cuốn sách để bắt đầu đọc.
+                                    Hãy chọn một cuốn truyện để bắt đầu đọc.
                                 </p>
 
                                 <Button
                                     as={Link}
                                     to="/books"
                                 >
-                                    Khám phá sách
+                                    Khám phá truyện
                                 </Button>
 
                             </Card>

@@ -231,7 +231,7 @@ const filteredCategories = categories.filter((cate) => {
                         <Col md={4}>
 
                             <Form.Control
-                                placeholder="Tìm tên truyện..."
+                                placeholder="Tìm thể loại truyện..."
                                 value={search}
                                 onChange={(e) => setSearch(e.target.value)}
                             />

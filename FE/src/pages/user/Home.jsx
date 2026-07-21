@@ -166,7 +166,7 @@ return (
         
 
         <h3 className="mt-5 mb-3">
-            📚 Sách mới cập nhật
+             Truyện mới cập nhật
         </h3>
 
         {renderBooks(newBooks)}
@@ -178,18 +178,18 @@ return (
                 to="/books"
                 variant="outline-success"
             >
-                Xem tất cả sách
+                Xem tất cả truyện
             </Button>
 
         </div>
 
         <h3 className="mt-5 mb-3">
-            ⭐ Sách nổi bật
+            Truyện nổi bật
         </h3>
 
         {renderBooks(featuredBooks)}
         <h3 className="mb-3">
-            🚀 Sách sắp ra mắt
+            Truyện sắp ra mắt
         </h3>
 
         {
@@ -199,7 +199,7 @@ return (
 
                 <Card.Body className="text-center text-muted">
 
-                    Hiện chưa có sách sắp ra mắt.
+                    Hiện chưa có truyện sắp ra mắt.
 
                 </Card.Body>
 
@@ -211,7 +211,7 @@ return (
 
         }
         <h3 className="mt-5 mb-3">
-    👁 Đọc nhiều nhất
+     Đọc nhiều nhất
 </h3>
 
 {renderBooks(topViewBooks)}
