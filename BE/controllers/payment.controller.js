@@ -76,7 +76,7 @@ export const createPayment = (req, res) => {
                     `https://webdoctruyenn.onrender.com/payment/cancel`
 
             });
-
+            console.log(fields);
             res.json({
 
                 checkoutURL,
