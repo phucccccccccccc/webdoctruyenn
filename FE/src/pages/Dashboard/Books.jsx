@@ -11,6 +11,7 @@ import {
     Image,
     Card
 } from "react-bootstrap";
+export const UPLOAD_URL = `${API_URL}/uploads`;
 
 export default function Books() {
 
@@ -210,7 +211,7 @@ const filteredBooks = books.filter((book) => {
                                         <td>
 
                                             <Image
-                                                src={`http://localhost:5000/uploads/${book.cover_image}`}
+                                                src={`${UPLOAD_URL}/${book.cover_image}`}
                                                 width={60}
                                                 height={80}
                                                 rounded

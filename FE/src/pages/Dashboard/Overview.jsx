@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../../api/api";
 import { Row, Col, Card } from "react-bootstrap";
 
 export default function Overview(){
@@ -8,7 +8,7 @@ export default function Overview(){
 
     useEffect(()=>{
 
-        axios.get("http://localhost:5000/api/dashboard/stats")
+        api.get("/dashboard/stats")
 
         .then((res)=>{
 

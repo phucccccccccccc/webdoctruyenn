@@ -8,6 +8,7 @@ import {
     Button
 } from "react-bootstrap";
 import { Link } from "react-router-dom";
+export const UPLOAD_URL = `${API_URL}/uploads`;
 
 export default function ReadingHistory() {
 
@@ -60,7 +61,7 @@ export default function ReadingHistory() {
 
                                     <Card.Img
                                         variant="top"
-                                src={`http://localhost:5000/uploads/${book.cover_image}`}
+                                src={`${UPLOAD_URL}/${book.cover_image}`}
                                 style={{
                                     height: "320px",
                                     width: "100%",

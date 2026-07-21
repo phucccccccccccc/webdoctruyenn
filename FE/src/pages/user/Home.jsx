@@ -8,6 +8,8 @@ import {
     
 } from "react-icons/fa";
 import { Link } from "react-router-dom";
+export const API_URL = import.meta.env.VITE_API_URL;
+export const UPLOAD_URL = `${API_URL}/uploads`;
 
 export default function Home() {
 
@@ -95,7 +97,7 @@ const renderBooks = (books) => (
 
                         <Card.Img
                             variant="top"
-                            src={`http://localhost:5000/uploads/${book.cover_image}`}
+                            src={`${UPLOAD_URL}/${book.cover_image}`}
                             style={{
                                 height: "320px",
                                 width: "100%",

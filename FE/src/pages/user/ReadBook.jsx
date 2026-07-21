@@ -258,7 +258,7 @@ if (!chapter&&!notPurchased) {
 
                                 <img
                                     key={img.page_number}
-                                    src={`http://localhost:5000/uploads/${img.image_url}`}
+                                    src={`${UPLOAD_URL}/${img.image_url}`}
                                     alt=""
                                     style={{
                                         width: "100%",

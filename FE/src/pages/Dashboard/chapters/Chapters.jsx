@@ -12,6 +12,7 @@ import {
     Image,
     Spinner
 } from "react-bootstrap";
+export const UPLOAD_URL = `${API_URL}/uploads`;
 
 export default function Chapters() {
 
@@ -184,7 +185,7 @@ export default function Chapters() {
                         <Col md={2}>
 
                             <Image
-                                src={`http://localhost:5000/uploads/${book.cover_image}`}
+                                src={`${UPLOAD_URL}/${book.cover_image}`}
                                 thumbnail
                             />
 

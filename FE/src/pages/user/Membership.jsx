@@ -61,7 +61,7 @@ export default function Membership() {
 
                                     <Card.Img
                                         variant="top"
-                                src={`http://localhost:5000/uploads/${book.cover_image}`}
+                                src={`${UPLOAD_URL}/${book.cover_image}`}
                                 style={{
                                     height: "320px",
                                     width: "100%",
