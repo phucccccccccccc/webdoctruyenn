@@ -12,12 +12,12 @@ const client = new SePayPgClient({
 export const createPayment = (req, res) => {
 
     const userId = req.user.id;
-
     const { amount, coin } = req.body;
 
     const orderCode = `NAP${Date.now()}`;
 
-    const sql = `
+    db.query(
+        `
         INSERT INTO payments
         (
             user_id,
@@ -27,10 +27,7 @@ export const createPayment = (req, res) => {
             status
         )
         VALUES (?,?,?,?,?)
-    `;
-
-    db.query(
-        sql,
+        `,
         [
             userId,
             orderCode,
@@ -64,22 +61,25 @@ export const createPayment = (req, res) => {
 
                 currency: "VND",
 
-                order_description: `Nạp ${coin} Coin`,
+                // Quan trọng
+                order_description: orderCode,
 
                 customer_id: userId.toString(),
 
-                success_url: `http://localhost:5173/payment/success?order=${orderCode}`,
+                success_url:
+                    `https://webdoctruyenn.onrender.com/payment/success?order=${orderCode}`,
 
-                error_url: `http://localhost:5173/payment/error`,
+                error_url:
+                    `https://webdoctruyenn.onrender.com/payment/error`,
 
-                cancel_url: `http://localhost:5173/payment/cancel`
+                cancel_url:
+                    `https://webdoctruyenn.onrender.com/payment/cancel`
 
             });
 
             res.json({
 
                 checkoutURL,
-
                 fields
 
             });
@@ -91,7 +91,8 @@ export const createPayment = (req, res) => {
 };
 export const webhook = (req, res) => {
 
-    console.log("Webhook:", req.body);
+    console.log("====== WEBHOOK ======");
+    console.log(JSON.stringify(req.body, null, 2));
 
     const {
 
@@ -106,123 +107,20 @@ export const webhook = (req, res) => {
 
     }
 
-    const sql = `
+    db.query(
+
+        `
         SELECT *
         FROM payments
         WHERE ? LIKE CONCAT('%', order_code, '%')
         LIMIT 1
-    `;
+        `,
 
-    db.query(sql, [content], (err, result) => {
+        [content],
 
-        if (err) {
+        (err, result) => {
 
-            console.log(err);
-
-            return res.sendStatus(500);
-
-        }
-
-        if (result.length === 0) {
-
-            console.log("Không tìm thấy đơn hàng");
-
-            return res.sendStatus(200);
-
-        }
-
-        const payment = result[0];
-
-        if (payment.status === "success") {
-
-            return res.sendStatus(200);
-
-        }
-
-        if (Number(transferAmount) < Number(payment.amount)) {
-
-            console.log("Thanh toán thiếu tiền");
-
-            return res.sendStatus(200);
-
-        }
-
-        db.query(
-            `
-            UPDATE payments
-            SET status='success'
-            WHERE id=?
-            `,
-            [payment.id]
-        );
-
-        db.query(
-            `
-            UPDATE users
-            SET total_coin = total_coin + ?
-            WHERE id=?
-            `,
-            [
-                payment.coin,
-                payment.user_id
-            ]
-        );
-
-        db.query(
-            `
-            INSERT INTO transactions
-            (
-                user_id,
-                amount,
-                type,
-                description
-            )
-            VALUES (?,?,?,?)
-            `,
-            [
-                payment.user_id,
-                payment.coin,
-                "topup",
-                `Nạp ${payment.coin} Coin qua SePay`
-            ]
-        );
-
-        console.log("Nạp coin thành công");
-
-        res.sendStatus(200);
-
-    });
-
-};
-export const paymentSuccess = async (req, res) => {
-
-    try {
-
-        console.log(req.body);
-
-        const {
-
-            order_invoice_number
-
-        } = req.body;
-
-        if (!order_invoice_number) {
-
-            return res.status(400).json({
-                message: "Thiếu mã đơn hàng"
-            });
-
-        }
-
-        const sql = `
-            SELECT *
-            FROM payments
-            WHERE order_code = ?
-        `;
-
-        db.query(sql,[order_invoice_number],(err,result)=>{
-
-            if(err){
+            if (err) {
 
                 console.log(err);
 
@@ -230,30 +128,170 @@ export const paymentSuccess = async (req, res) => {
 
             }
 
-            if(result.length===0){
+            if (result.length === 0) {
 
-                return res.sendStatus(404);
+                console.log("Không tìm thấy đơn hàng");
+
+                return res.sendStatus(200);
 
             }
 
-            const payment=result[0];
+            const payment = result[0];
 
-            if(payment.status==="success"){
+            if (payment.status === "success") {
 
-                return res.json({
-                    message:"Đơn đã xử lý"
+                console.log("Đơn đã xử lý");
+
+                return res.sendStatus(200);
+
+            }
+
+            if (Number(transferAmount) < Number(payment.amount)) {
+
+                console.log("Chuyển khoản thiếu tiền");
+
+                return res.sendStatus(200);
+
+            }
+
+            db.query(
+
+                `
+                UPDATE payments
+                SET status='success'
+                WHERE id=?
+                `,
+
+                [payment.id],
+
+                (err) => {
+
+                    if (err) {
+
+                        console.log(err);
+
+                        return res.sendStatus(500);
+
+                    }
+
+                    db.query(
+
+                        `
+                        UPDATE users
+                        SET total_coin = total_coin + ?
+                        WHERE id=?
+                        `,
+
+                        [
+                            payment.coin,
+                            payment.user_id
+                        ],
+
+                        (err) => {
+
+                            if (err) {
+
+                                console.log(err);
+
+                                return res.sendStatus(500);
+
+                            }
+
+                            db.query(
+
+                                `
+                                INSERT INTO transactions
+                                (
+                                    user_id,
+                                    amount,
+                                    type,
+                                    description
+                                )
+                                VALUES (?,?,?,?)
+                                `,
+
+                                [
+                                    payment.user_id,
+                                    payment.coin,
+                                    "topup",
+                                    `Nạp ${payment.coin} Coin qua SePay`
+                                ],
+
+                                (err) => {
+
+                                    if (err) {
+
+                                        console.log(err);
+
+                                        return res.sendStatus(500);
+
+                                    }
+
+                                    console.log("Nạp coin thành công");
+
+                                    res.sendStatus(200);
+
+                                }
+
+                            );
+
+                        }
+
+                    );
+
+                }
+
+            );
+
+        }
+
+    );
+
+};
+export const paymentSuccess = (req, res) => {
+
+    const orderCode = req.query.order;
+
+    if (!orderCode) {
+
+        return res.status(400).json({
+            message: "Thiếu mã đơn"
+        });
+
+    }
+
+    db.query(
+
+        `
+        SELECT status
+        FROM payments
+        WHERE order_code = ?
+        `,
+
+        [orderCode],
+
+        (err, result) => {
+
+            if (err) {
+
+                console.log(err);
+
+                return res.sendStatus(500);
+
+            }
+
+            if (result.length === 0) {
+
+                return res.status(404).json({
+                    message: "Không tìm thấy đơn"
                 });
 
             }
 
-        });
+            res.json(result[0]);
 
-    } catch(err){
+        }
 
-        console.log(err);
-
-        res.sendStatus(500);
-
-    }
+    );
 
 };
