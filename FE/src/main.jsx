@@ -31,7 +31,6 @@ import BookDetail from "./pages/user/BookDetail";
 import Reader from "./pages/user/ReadBook";
 import Chapters from "./pages/Dashboard/chapters/Chapters";
 import Categories from "./pages/user/Categories";
-import BooksByCategory from "./pages/BooksByCategory";
 // import BookDetail from "./pages/user/BookDetail";
 
 import DashBoard from "./pages/Dashboard/Dashboard";
@@ -75,10 +74,7 @@ createRoot(document.getElementById('root')).render(
                         path="/categories"
                         element={<Categories />}
                     />
-                                    <Route
-                    path="/books/category/:id"
-                    element={<BooksByCategory />}
-                />
+                                    
                     <Route
                         path="books/:bookId/chapter/:chapterNumber"
                         element={
