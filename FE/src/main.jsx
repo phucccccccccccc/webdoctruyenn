@@ -31,6 +31,7 @@ import BookDetail from "./pages/user/BookDetail";
 import Reader from "./pages/user/ReadBook";
 import Chapters from "./pages/Dashboard/chapters/Chapters";
 import Categories from "./pages/user/Categories";
+import BooksByCategory from "./pages/BooksByCategory";
 // import BookDetail from "./pages/user/BookDetail";
 
 import DashBoard from "./pages/Dashboard/Dashboard";
