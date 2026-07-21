@@ -8,7 +8,7 @@ import {
     
 } from "react-icons/fa";
 import { Link } from "react-router-dom";
-import { UPLOAD_URL } from "../config";
+import { UPLOAD_URL } from "../../config";
 
 export default function Home() {
 
