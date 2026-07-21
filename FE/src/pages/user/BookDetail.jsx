@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-export const API_URL = import.meta.env.VITE_API_URL;
-export const UPLOAD_URL = `${API_URL}/uploads`;
+import { UPLOAD_URL } from "../config";
 
 import api from "../../api/api";
 

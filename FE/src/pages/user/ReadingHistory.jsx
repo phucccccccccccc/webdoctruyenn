@@ -8,7 +8,7 @@ import {
     Button
 } from "react-bootstrap";
 import { Link } from "react-router-dom";
-export const UPLOAD_URL = `${API_URL}/uploads`;
+import { UPLOAD_URL } from "../config";
 
 export default function ReadingHistory() {
 
