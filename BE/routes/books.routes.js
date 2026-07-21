@@ -15,7 +15,9 @@
         buyBook,
         createBook,
         updateBook,
-        deleteBook
+        deleteBook,
+        getComingSoonBooks
+
     }
     from "../controllers/books.controller.js";
 
@@ -39,6 +41,8 @@
     router.get("/views", getBooksByViews);
 
     router.get("/price", getBooksByPrice);
+
+    router.get("/coming-soon", getComingSoonBooks);
 
     router.get("/search/:keyword", searchBooks);
 

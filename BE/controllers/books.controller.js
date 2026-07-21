@@ -868,3 +868,38 @@ export const deleteBook = (req, res) => {
         }
     );
 };
+export const getComingSoonBooks = (req, res) => {
+
+    const sql = `
+        SELECT
+            b.id,
+            b.title,
+            b.author,
+            b.cover_image,
+            b.coin_price,
+            b.views
+        FROM books b
+
+        WHERE NOT EXISTS (
+
+            SELECT 1
+            FROM chapters c
+            WHERE c.book_id = b.id
+
+        )
+
+        ORDER BY b.created_at DESC
+
+        LIMIT 8
+    `;
+
+    db.query(sql, (err, result) => {
+
+        if (err)
+            return res.status(500).json(err);
+
+        res.json(result);
+
+    });
+
+};

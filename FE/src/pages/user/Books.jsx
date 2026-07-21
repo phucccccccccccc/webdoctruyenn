@@ -15,13 +15,19 @@ import {
     Form,
     InputGroup
 } from "react-bootstrap";
-import { Link } from "react-router-dom";
-
+import {
+    Link,
+    useSearchParams
+} from "react-router-dom";
 export default function Books() {
 
     const [books, setBooks] = useState([]);
-    const [search, setSearch] = useState("");
+
     const [categories, setCategories] = useState([]);
+
+    const [searchParams] = useSearchParams();
+
+    const keyword = searchParams.get("search") || "";
     
 
     // Lấy tất cả sách
@@ -52,29 +58,31 @@ export default function Books() {
 
     useEffect(() => {
 
+    loadCategories();
+
+}, []);
+
+useEffect(() => {
+
+    if (keyword.trim() === "") {
+
         loadBooks();
-        loadCategories();
 
-    }, []);
+    } else {
 
-    // Tìm kiếm
-const handleSearch = (e) => {
-    e.preventDefault();
+        api.get(`/books/search/${encodeURIComponent(keyword)}`)
+            .then((res) => {
 
-    if (search.trim() === "") {
-        loadBooks();
-        return;
+                setBooks(res.data);
+
+            })
+            .catch(console.log);
+
     }
 
-    api
-        .get(`/books/search/${search}`)
-        .then((res) => {
-            setBooks(res.data);
-        })
-        .catch((err) => {
-            console.log(err);
-        });
-};
+}, [keyword]);
+
+
 
     // Lọc theo thể loại
     const handleCategory = (id) => {
@@ -102,25 +110,7 @@ const handleSearch = (e) => {
 
                 <Col md={8}>
 
-                   <Form onSubmit={handleSearch}>
-    <InputGroup>
-
-        <Form.Control
-            type="text"
-            placeholder="Nhập tên sách..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-        />
-
-        <Button
-            type="submit"
-            variant="success"
-        >
-            Tìm kiếm
-        </Button>
-
-    </InputGroup>
-</Form>
+ 
 
                 </Col>
 

@@ -5,7 +5,8 @@ import {
     Button,
     Form,
     Dropdown,
-    Image
+    Image,
+    NavDropdown 
 } from "react-bootstrap";import { FaSearch } from "react-icons/fa";
 import { useNavigate, Link } from "react-router-dom";
 import { useState,useEffect } from "react";
@@ -15,6 +16,8 @@ export default function UserHeader() {
 const navigate = useNavigate();
 
 const [search, setSearch] = useState("");
+
+const [categories, setCategories] = useState([]);
 
 const [coin, setCoin] = useState(0);
 
@@ -35,6 +38,7 @@ window.location.reload();
     navigate("/");
 
 };
+
 const handleSearch = (e) => {
 
     e.preventDefault();
@@ -72,6 +76,13 @@ useEffect(() => {
 
         })
         .catch(console.log);
+        api.get("/category")
+    .then((res) => {
+
+        setCategories(res.data);
+
+    })
+    .catch(console.log);
 
 }, [user]);
 
@@ -108,6 +119,37 @@ return (
                     <Nav.Link as={Link} to="/books">
                         Tất cả sách
                     </Nav.Link>
+                     <NavDropdown
+                        title="Thể loại"
+                        id="category-dropdown"
+                    >
+
+                        <NavDropdown.Item
+                            as={Link}
+                            to="/books"
+                        >
+                            Tất cả sách
+                        </NavDropdown.Item>
+
+                        <NavDropdown.Divider />
+
+                        {
+
+                            categories.map((category) => (
+
+                                <NavDropdown.Item
+                                    key={category.id}
+                                    as={Link}
+                                    to={`/books/category/${category.id}`}
+                                >
+                                    {category.name}
+                                </NavDropdown.Item>
+
+                            ))
+
+                        }
+
+                    </NavDropdown>
 
                     <Nav.Link as={Link} to="/membership">
                         Sách đã mua 
@@ -116,6 +158,7 @@ return (
                     <Nav.Link as={Link} to="/reading-history">
                         Sách đã đọc 
                     </Nav.Link>
+                   
 
                     
 

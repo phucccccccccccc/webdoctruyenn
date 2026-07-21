@@ -15,6 +15,9 @@ export default function Home() {
 const [featuredBooks, setFeaturedBooks] = useState([]);
 const [newBooks, setNewBooks] = useState([]);
 const [categories, setCategories] = useState([]);
+const [comingSoonBooks, setComingSoonBooks] = useState([]);
+
+const [topViewBooks, setTopViewBooks] = useState([]);
 
 useEffect(() => {
 
@@ -56,171 +59,185 @@ useEffect(() => {
             console.log(err);
 
         });
+        api.get("/books/coming-soon")
+    .then((res) => {
+
+        console.log("Coming Soon:", res.data);
+
+        setComingSoonBooks(res.data);
+
+    })
+    .catch(console.log);
+
+api
+    .get("/books/views")
+    .then((res) => {
+
+        setTopViewBooks(res.data);
+
+    })
+    .catch(console.log);
 
 }, []);
+const renderBooks = (books) => (
+
+    <Row xs={2} md={3} lg={4} xxl={5} className="g-4">
+
+        {
+
+            books.map((book) => (
+
+                <Col
+                    key={book.id}
+                >
+
+                    <Card className="h-100 shadow-sm d-flex flex-column">
+
+                        <Card.Img
+                            variant="top"
+                            src={`http://localhost:5000/uploads/${book.cover_image}`}
+                            style={{
+                                height: "320px",
+                                width: "100%",
+                                objectFit: "contain",
+                                backgroundColor: "#f5f5f5"
+                            }}
+                        />
+
+                        <Card.Body className="d-flex flex-column">
+
+                            <Card.Title
+                                style={{
+                                    minHeight: "48px",
+                                    display: "-webkit-box",
+                                    WebkitLineClamp: 2,
+                                    WebkitBoxOrient: "vertical",
+                                    overflow: "hidden"
+                                }}
+                            >
+                                {book.title}
+                            </Card.Title>
+
+                            <p>{book.author}</p>
+
+                            <p>
+
+                                <FaCoins className="text-warning me-2"/>
+
+                                {book.coin_price} Coin
+
+                            </p>
+
+                            <p>
+
+                                <FaEye className="text-primary me-2"/>
+
+                                {book.views}
+
+                            </p>
+
+                            <p>
+
+                                <FaHeart className="text-danger me-2"/>
+
+                                {book.favorites}
+
+                            </p>
+
+                            <Link
+                                to={`/books/${book.id}`}
+                                className="btn btn-success w-100"
+                            >
+                                Xem chi tiết
+                            </Link>
+
+                        </Card.Body>
+
+                    </Card>
+
+                </Col>
+
+            ))
+
+        }
+
+    </Row>
+
+);
 
 return (
 
     <>
-        <h3 className="mb-3">
-             Sách nổi bật
+
+        
+
+        <h3 className="mt-5 mb-3">
+            📚 Sách mới cập nhật
         </h3>
 
-        <Row>
+        {renderBooks(newBooks)}
 
-            {
-
-                featuredBooks.map((book) => (
-
-                    <Col
-                        md={3}
-                        key={book.id}
-                        className="mb-4"
-                    >
-
-                        <Card className="h-100 shadow-sm">
-
-                            <Card.Img
-                                variant="top"
-                                src={`http://localhost:5000/uploads/${book.cover_image}`}
-                                style={{
-                                    height: "320px",
-                                    width: "100%",
-                                    objectFit: "contain",
-                                    backgroundColor: "#f5f5f5"
-                                }}
-                            />
-
-                            <Card.Body>
-
-                                <Card.Title>
-                                    {book.title}
-                                </Card.Title>
-
-                                <p>
-                                    {book.author}
-                                </p>
-
-                                <p className="mb-2">
-                                    <FaCoins className="text-warning me-2" />
-                                        {book.coin_price} Coin
-                                </p>
-
-                                <p className="mb-2">
-                                    <FaEye className="text-primary me-2" />
-                                    {book.views}
-                                </p>
-
-                                <p className="mb-3">
-                                    <FaHeart className="text-danger me-2" />
-                                    {book.favorites}
-                                </p>
-
-                                   <Link
-                                        to={`/books/${book.id}`}
-                                        className="btn btn-success w-100"
-                                    >
-                                        Xem chi tiết
-                                    </Link>
-
-                            </Card.Body>
-
-                        </Card>
-
-                    </Col>
-
-                ))
-
-            }
-
-        </Row>
-        <h3 className="mt-5 mb-3">
-     Thể loại
-</h3>
-
-<div className="mb-5">
-
-    {
-
-        categories.map((category) => (
+        <div className="text-center mb-5">
 
             <Button
-                key={category.id}
+                as={Link}
+                to="/books"
                 variant="outline-success"
-                className="me-2 mb-2"
             >
-
-                {category.name}
-
+                Xem tất cả sách
             </Button>
 
-        ))
+        </div>
 
-    }
+        <h3 className="mt-5 mb-3">
+            ⭐ Sách nổi bật
+        </h3>
 
-</div>
-<h3 className="mt-5 mb-3">
-     Sách mới cập nhật
+        {renderBooks(featuredBooks)}
+        <h3 className="mb-3">
+            🚀 Sách sắp ra mắt
+        </h3>
+
+        {
+            comingSoonBooks.length === 0 ?
+
+            <Card className="mb-5">
+
+                <Card.Body className="text-center text-muted">
+
+                    Hiện chưa có sách sắp ra mắt.
+
+                </Card.Body>
+
+            </Card>
+
+            :
+
+            renderBooks(comingSoonBooks)
+
+        }
+        <h3 className="mt-5 mb-3">
+    👁 Đọc nhiều nhất
 </h3>
 
-<Row>
+{renderBooks(topViewBooks)}
 
-    {
+<div className="text-center mb-5">
 
-        newBooks.map((book) => (
+    <Button
+        as={Link}
+        to="/books"
+        variant="outline-primary"
+    >
+        Xem thêm
+    </Button>
 
-            <Col
-                md={3}
-                key={book.id}
-                className="mb-4"
-            >
+</div>
 
-                <Card className="h-100 shadow-sm">
 
-                    <Card.Img
-                        variant="top"
-                        src={`http://localhost:5000/uploads/${book.cover_image}`}
-                        style={{
-                            height: "320px",
-                            width: "100%",
-                            objectFit: "contain",
-                            backgroundColor: "#f5f5f5"
-                        }}
-                    />
 
-                    <Card.Body>
 
-                        <Card.Title>
-                            {book.title}
-                        </Card.Title>
-
-                        <p>
-                            {book.author}
-                        </p>
-
-                        <p>
-                            {book.coin_price} Coin
-                        </p>
-                                   <Link
-                                        to={`/books/${book.id}`}
-                                        className="btn btn-success w-100"
-                                    >
-                                        Xem chi tiết
-                                    </Link>
-
-                    </Card.Body>
-
-                </Card>
-
-            </Col>
-
-        ))
-
-    }
-
-</Row>
-
-    </>
+</>
 
 );
 

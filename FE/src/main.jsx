@@ -30,6 +30,7 @@ import Books from "./pages/user/Books";
 import BookDetail from "./pages/user/BookDetail";
 import Reader from "./pages/user/ReadBook";
 import Chapters from "./pages/Dashboard/Chapters/Chapters";
+import Categories from "./pages/user/Categories";
 // import BookDetail from "./pages/user/BookDetail";
 
 import DashBoard from "./pages/Dashboard/Dashboard";
@@ -70,8 +71,12 @@ createRoot(document.getElementById('root')).render(
                     element={<BookDetail />}
                     /> 
                     <Route
-path="books/:bookId/chapter/:chapterNumber"
-element={
+                        path="/categories"
+                        element={<Categories />}
+                    />
+                    <Route
+                        path="books/:bookId/chapter/:chapterNumber"
+                        element={
     <ProtectedRoute>
 
         <Reader/>
