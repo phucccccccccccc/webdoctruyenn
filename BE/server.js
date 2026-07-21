@@ -35,7 +35,7 @@ app.get("/test", (req, res) => {
     host: process.env.DB_HOST,
     port: process.env.DB_PORT,
     database: process.env.DB_NAME,
-    user: process.env.DB_USER
+    user: process.env.DB_USER,
   });
 });
 app.use("/api/auth", authRoutes);
