@@ -1,5 +1,8 @@
 import { SePayPgClient } from "sepay-pg-node";
 import { db } from "../config/config.js";
+console.log("MERCHANT:", process.env.SEPAY_MERCHANT_ID);
+console.log("SECRET:", process.env.SEPAY_SECRET_KEY);
+console.log("ENV:", process.env.SEPAY_ENV);
 
 const client = new SePayPgClient({
     env: process.env.SEPAY_ENV,
