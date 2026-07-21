@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import api from "../../../api/api";
 import ChapterForm from "../../../components/chapters/ChapterForm";
-
+import { UPLOAD_URL } from "../../../config";
 import {
     Card,
     Table,
@@ -12,7 +12,6 @@ import {
     Image,
     Spinner
 } from "react-bootstrap";
-export const UPLOAD_URL = `${API_URL}/uploads`;
 
 export default function Chapters() {
 
