@@ -4,7 +4,7 @@ import {
     useParams,
     useNavigate
 } from "react-router-dom";
-
+import { UPLOAD_URL } from "../../config";
 import ReaderHeader from "../../components/ReaderHeader";
 
 import {
