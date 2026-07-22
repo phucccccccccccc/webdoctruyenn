@@ -2,7 +2,7 @@ import express from "express";
 import {
     createPayment,
     webhook,
-    paymentSuccess
+    getPaymentStatus
 } from "../controllers/payment.controller.js";
 import { verifyToken } from "../middlewares/auth.middleware.js";
 
@@ -19,9 +19,11 @@ router.post(
     webhook
 );
 
-router.post(
-    "/success",
-    paymentSuccess
+
+router.get(
+    "/status/:order",
+    verifyToken,
+    getPaymentStatus
 );
 
 export default router;

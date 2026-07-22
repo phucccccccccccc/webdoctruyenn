@@ -1,92 +1,72 @@
-import { SePayPgClient } from "sepay-pg-node";
 import { db } from "../config/config.js";
 
-const client = new SePayPgClient({
-    env: process.env.SEPAY_ENV,
-    merchant_id: process.env.SEPAY_MERCHANT_ID,
-    secret_key: process.env.SEPAY_SECRET_KEY
-});
 
-// ================== TẠO THANH TOÁN ==================
+export const createPayment = async (req, res) => {
 
-export const createPayment = (req, res) => {
+    console.log("🔥 CREATE PAYMENT");
 
     const userId = req.user.id;
+
     const { amount, coin } = req.body;
 
     const orderCode = `NAP${Date.now()}`;
 
-    db.query(
-        `
-        INSERT INTO payments
-        (
-            user_id,
-            order_code,
-            amount,
-            coin,
-            status
-        )
-        VALUES (?,?,?,?,?)
-        `,
-        [
-            userId,
-            orderCode,
-            amount,
-            coin,
-            "pending"
-        ],
-        (err) => {
+    try {
 
-            if (err) {
+        await new Promise((resolve, reject) => {
 
-                console.log(err);
+            db.query(
+                `
+                INSERT INTO payments
+                (
+                    user_id,
+                    order_code,
+                    amount,
+                    coin,
+                    status
+                )
+                VALUES (?,?,?,?,?)
+                `,
+                [
+                    userId,
+                    orderCode,
+                    amount,
+                    coin,
+                    "pending"
+                ],
+                (err) => {
 
-                return res.status(500).json({
-                    message: "Không thể tạo đơn hàng"
-                });
+                    if (err) reject(err);
 
-            }
+                    else resolve();
 
-            const checkoutURL = client.checkout.initCheckoutUrl();
+                }
+            );
 
-            const fields = client.checkout.initOneTimePaymentFields({
+        });
 
-                operation: "PURCHASE",
+        const qr =
+`https://img.vietqr.io/image/MB-0798617250-compact2.png?amount=${amount}&addInfo=${orderCode}&accountName=DANG%20HAI%20HOANG%20PHUC`;
 
-                payment_method: "BANK_TRANSFER",
+res.json({
+    qr,
+    orderCode,
+    amount
+});
 
-                order_invoice_number: orderCode,
+    }
 
-                order_amount: amount,
+    catch (err) {
 
-                currency: "VND",
+        console.log(err.response?.data || err);
 
-                // Quan trọng
-                order_description: orderCode,
+        res.status(500).json({
 
-                customer_id: userId.toString(),
+            message: "Không tạo được QR"
 
-                success_url:
-                    `https://webdoctruyenn.onrender.com/payment/success?order=${orderCode}`,
+        });
 
-                error_url:
-                    `https://webdoctruyenn.onrender.com/payment/error`,
-
-                cancel_url:
-                    `https://webdoctruyenn.onrender.com/payment/cancel`
-
-            });
-            console.log(fields);
-            res.json({
-
-                checkoutURL,
-                fields
-
-            });
-
-        }
-
-    );
+    }
 
 };
 export const webhook = (req, res) => {
@@ -94,12 +74,7 @@ export const webhook = (req, res) => {
     console.log("====== WEBHOOK ======");
     console.log(JSON.stringify(req.body, null, 2));
 
-    const {
-
-        content,
-        transferAmount
-
-    } = req.body;
+    const { content, transferAmount } = req.body;
 
     if (!content) {
 
@@ -107,66 +82,42 @@ export const webhook = (req, res) => {
 
     }
 
-    db.query(
+    db.getConnection((err, conn) => {
 
-        `
-        SELECT *
-        FROM payments
-        WHERE ? LIKE CONCAT('%', order_code, '%')
-        LIMIT 1
-        `,
+        if (err) {
 
-        [content],
+            console.log(err);
 
-        (err, result) => {
+            return res.sendStatus(500);
+
+        }
+
+        conn.beginTransaction(err => {
 
             if (err) {
 
-                console.log(err);
+                conn.release();
 
                 return res.sendStatus(500);
 
             }
 
-            if (result.length === 0) {
-
-                console.log("Không tìm thấy đơn hàng");
-
-                return res.sendStatus(200);
-
-            }
-
-            const payment = result[0];
-
-            if (payment.status === "success") {
-
-                console.log("Đơn đã xử lý");
-
-                return res.sendStatus(200);
-
-            }
-
-            if (Number(transferAmount) < Number(payment.amount)) {
-
-                console.log("Chuyển khoản thiếu tiền");
-
-                return res.sendStatus(200);
-
-            }
-
-            db.query(
+            conn.query(
 
                 `
-                UPDATE payments
-                SET status='success'
-                WHERE id=?
+                SELECT *
+                FROM payments
+                WHERE ? LIKE CONCAT('%', order_code, '%')
+                LIMIT 1
                 `,
 
-                [payment.id],
+                [content],
 
-                (err) => {
+                (err, result) => {
 
                     if (err) {
+
+                        conn.rollback(() => conn.release());
 
                         console.log(err);
 
@@ -174,22 +125,53 @@ export const webhook = (req, res) => {
 
                     }
 
-                    db.query(
+                    if (result.length === 0) {
+
+                        conn.rollback(() => conn.release());
+
+                        console.log("Không tìm thấy đơn");
+
+                        return res.sendStatus(200);
+
+                    }
+
+                    const payment = result[0];
+
+                    if (payment.status === "success") {
+
+                        conn.rollback(() => conn.release());
+
+                        console.log("Đơn đã xử lý");
+
+                        return res.sendStatus(200);
+
+                    }
+
+                    if (Number(transferAmount) < Number(payment.amount)) {
+
+                        conn.rollback(() => conn.release());
+
+                        console.log("Chuyển thiếu tiền");
+
+                        return res.sendStatus(200);
+
+                    }
+
+                    conn.query(
 
                         `
-                        UPDATE users
-                        SET total_coin = total_coin + ?
+                        UPDATE payments
+                        SET status='success'
                         WHERE id=?
                         `,
 
-                        [
-                            payment.coin,
-                            payment.user_id
-                        ],
+                        [payment.id],
 
                         (err) => {
 
                             if (err) {
+
+                                conn.rollback(() => conn.release());
 
                                 console.log(err);
 
@@ -197,29 +179,24 @@ export const webhook = (req, res) => {
 
                             }
 
-                            db.query(
+                            conn.query(
 
                                 `
-                                INSERT INTO transactions
-                                (
-                                    user_id,
-                                    amount,
-                                    type,
-                                    description
-                                )
-                                VALUES (?,?,?,?)
+                                UPDATE users
+                                SET total_coin = total_coin + ?
+                                WHERE id=?
                                 `,
 
                                 [
-                                    payment.user_id,
                                     payment.coin,
-                                    "topup",
-                                    `Nạp ${payment.coin} Coin qua SePay`
+                                    payment.user_id
                                 ],
 
                                 (err) => {
 
                                     if (err) {
+
+                                        conn.rollback(() => conn.release());
 
                                         console.log(err);
 
@@ -227,9 +204,61 @@ export const webhook = (req, res) => {
 
                                     }
 
-                                    console.log("Nạp coin thành công");
+                                    conn.query(
 
-                                    res.sendStatus(200);
+                                        `
+                                        INSERT INTO transactions
+                                        (
+                                            user_id,
+                                            amount,
+                                            type,
+                                            description
+                                        )
+                                        VALUES (?,?,?,?)
+                                        `,
+
+                                        [
+                                            payment.user_id,
+                                            payment.coin,
+                                            "topup",
+                                            `Nạp ${payment.coin} Coin qua SePay`
+                                        ],
+
+                                        (err) => {
+
+                                            if (err) {
+
+                                                conn.rollback(() => conn.release());
+
+                                                console.log(err);
+
+                                                return res.sendStatus(500);
+
+                                            }
+
+                                            conn.commit(err => {
+
+                                                if (err) {
+
+                                                    conn.rollback(() => conn.release());
+
+                                                    console.log(err);
+
+                                                    return res.sendStatus(500);
+
+                                                }
+
+                                                conn.release();
+
+                                                console.log("✅ Nạp coin thành công");
+
+                                                res.sendStatus(200);
+
+                                            });
+
+                                        }
+
+                                    );
 
                                 }
 
@@ -243,22 +272,14 @@ export const webhook = (req, res) => {
 
             );
 
-        }
-
-    );
-
-};
-export const paymentSuccess = (req, res) => {
-
-    const orderCode = req.query.order;
-
-    if (!orderCode) {
-
-        return res.status(400).json({
-            message: "Thiếu mã đơn"
         });
 
-    }
+    });
+
+};
+export const getPaymentStatus = (req, res) => {
+    console.log("CLICK PAYMENT");
+    const { order } = req.params;
 
     db.query(
 
@@ -268,7 +289,7 @@ export const paymentSuccess = (req, res) => {
         WHERE order_code = ?
         `,
 
-        [orderCode],
+        [order],
 
         (err, result) => {
 

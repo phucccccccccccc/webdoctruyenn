@@ -1,56 +1,63 @@
-import { Container, Card, Button, Row, Col } from "react-bootstrap";
+import { useState } from "react";
+import {
+    Container,
+    Card,
+    Button,
+    Row,
+    Col,
+    Modal
+} from "react-bootstrap";
+
 import api from "../../api/api";
 
 export default function Topup() {
 
-    const handlePayment = async (amount, coin) => {
+    const [show, setShow] = useState(false);
 
-        try {
+    const [qr, setQr] = useState("");
 
-            const res = await api.post("/payment/create", {
-                amount,
-                coin
-            });
+    const [amount, setAmount] = useState(0);
 
-            const { checkoutURL, fields } = res.data;
+    const [orderCode, setOrderCode] = useState("");
 
-            const form = document.createElement("form");
+    const [status, setStatus] = useState("pending");
 
-            form.method = "POST";
-            form.action = checkoutURL;
+ const handlePayment = async (money, coin) => {
 
-            Object.entries(fields).forEach(([key, value]) => {
+    console.log("Đã bấm nút");
 
-                const input = document.createElement("input");
+    try {
 
-                input.type = "hidden";
-                input.name = key;
-                input.value = value;
+        console.log("Chuẩn bị gọi API");
 
-                form.appendChild(input);
+        const res = await api.post("/payment/create", {
+            amount: money,
+            coin
+        });
 
-            });
+        console.log("STATUS:", res.status);
+        console.log("DATA:", res.data);
 
-            document.body.appendChild(form);
+    } catch (err) {
 
-            form.submit();
+        console.log("ERROR:", err);
 
-        } catch (err) {
+        console.log("RESPONSE:", err.response);
 
-            console.log(err);
+        console.log("DATA:", err.response?.data);
 
-            alert("Không thể tạo thanh toán.");
+    }
 
-        }
-
-    };
+};
 
     return (
 
         <Container className="py-5">
 
             <h2 className="mb-4">
+
                 Nạp Coin
+
             </h2>
 
             <Row>
@@ -64,11 +71,15 @@ export default function Topup() {
                         <h5>5.000đ</h5>
 
                         <Button
-                            onClick={() => handlePayment(5000, 50)}
-                        >
-                            Thanh toán
-                        </Button>
-
+    variant="danger"
+    onClick={() => {
+        alert("CLICK");
+        console.log("CLICK BUTTON");
+        handlePayment(5000, 50);
+    }}
+>
+    Thanh toán
+</Button>
                     </Card>
 
                 </Col>
@@ -110,6 +121,102 @@ export default function Topup() {
                 </Col>
 
             </Row>
+
+            <Modal
+                show={show}
+                centered
+                onHide={() => {
+
+                    setShow(false);
+
+                    setStatus("pending");
+
+                }}
+            >
+
+                <Modal.Header closeButton>
+
+                    <Modal.Title>
+
+                        Nạp Coin
+
+                    </Modal.Title>
+
+                </Modal.Header>
+
+                <Modal.Body className="text-center">
+
+                    {
+
+                        status === "pending"
+
+                        ?
+
+                        <>
+
+                            <img
+                                src={qr}
+                                alt="QR"
+                                className="img-fluid"
+                            />
+
+                            <h5 className="mt-3">
+
+                                {Number(amount || 0).toLocaleString()} VNĐ
+
+                            </h5>
+
+                            <p>
+
+                                Nội dung chuyển khoản
+
+                            </p>
+
+                            <h4 className="text-danger">
+
+                                {orderCode}
+
+                            </h4>
+
+                            <small>
+
+                                Chuyển đúng nội dung để hệ thống tự cộng Coin.
+
+                            </small>
+
+                        </>
+
+                        :
+
+                        <>
+
+                            <div
+                                className="display-1"
+                            >
+
+                                ✅
+
+                            </div>
+
+                            <h3 className="text-success">
+
+                                Nạp Coin thành công
+
+                            </h3>
+
+                            <p>
+
+                                Coin đã được cộng vào tài khoản.
+
+                            </p>
+
+                        </>
+
+                    }
+
+                </Modal.Body>
+
+            </Modal>
 
         </Container>
 

@@ -21,9 +21,22 @@ const [categories, setCategories] = useState([]);
 
 const [coin, setCoin] = useState(0);
 
+
 const user =
     JSON.parse(localStorage.getItem("user")) ||
     JSON.parse(sessionStorage.getItem("user"));
+    const loadProfile = () => {
+
+    api.get("/user/profile")
+        .then((res) => {
+
+            setCoin(res.data.total_coin);
+
+        })
+        .catch(console.log);
+
+};
+
 
 
 const handleLogout = () => {
@@ -34,8 +47,8 @@ sessionStorage.removeItem("user");
 sessionStorage.removeItem("token");
 
 
+navigate("/");
 window.location.reload();
-    navigate("/");
 
 };
 
@@ -69,20 +82,29 @@ useEffect(() => {
 
     if (!user) return;
 
-    api.get("/user/profile")
+    loadProfile();
+
+    api.get("/category")
         .then((res) => {
 
-            setCoin(res.data.total_coin);
+            setCategories(res.data);
 
         })
         .catch(console.log);
-        api.get("/category")
-    .then((res) => {
 
-        setCategories(res.data);
+    const updateCoin = () => {
 
-    })
-    .catch(console.log);
+        loadProfile();
+
+    };
+
+    window.addEventListener("coinUpdated", updateCoin);
+
+    return () => {
+
+        window.removeEventListener("coinUpdated", updateCoin);
+
+    };
 
 }, [user]);
 
