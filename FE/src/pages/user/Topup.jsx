@@ -24,27 +24,52 @@ export default function Topup() {
 
  const handlePayment = async (money, coin) => {
 
-    console.log("Đã bấm nút");
-
     try {
-
-        console.log("Chuẩn bị gọi API");
 
         const res = await api.post("/payment/create", {
             amount: money,
             coin
         });
 
-        console.log("STATUS:", res.status);
-        console.log("DATA:", res.data);
+        setQr(res.data.qr);
+        setAmount(res.data.amount);
+        setOrderCode(res.data.orderCode);
+        setStatus("pending");
+        setShow(true);
+
+        const interval = setInterval(async () => {
+
+            try {
+
+                const result = await api.get(
+                    `/payment/status/${res.data.orderCode}`
+                );
+
+                if (result.data.status === "success") {
+
+                    clearInterval(interval);
+
+                    setStatus("success");
+
+                    window.dispatchEvent(
+                        new Event("coinUpdated")
+                    );
+
+                }
+
+            } catch (err) {
+
+                console.log(err);
+
+            }
+
+        }, 3000);
 
     } catch (err) {
 
-        console.log("ERROR:", err);
+        console.log(err);
 
-        console.log("RESPONSE:", err.response);
-
-        console.log("DATA:", err.response?.data);
+        alert("Không thể tạo thanh toán.");
 
     }
 
