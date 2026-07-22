@@ -4,25 +4,22 @@ import {db} from "../config/config.js";
  
 
 // Lấy 1 category
-export const getCategories = async (req, res) => {
+export const getCategory = (req, res) => {
 
-    try {
+    db.query(
+        "SELECT * FROM categories WHERE id = ?",
+        [req.params.id],
+        (err, result) => {
 
-        const [rows] = await db.query(
-            "SELECT * FROM categories ORDER BY id DESC"
-        );
+            if (err) return res.status(500).json(err);
 
-        res.json(rows);
+            res.json(result[0]);
 
-    } catch (err) {
-
-        console.log(err);
-
-        res.sendStatus(500);
-
-    }
+        }
+    );
 
 };
+
 // Thêm
 export const createCategory = (req, res) => {
 
