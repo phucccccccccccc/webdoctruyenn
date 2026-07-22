@@ -98,8 +98,7 @@ export default function Topup() {
                         <Button
     variant="danger"
     onClick={() => {
-        alert("CLICK");
-        console.log("CLICK BUTTON");
+        
         handlePayment(5000, 50);
     }}
 >

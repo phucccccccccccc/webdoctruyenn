@@ -3,7 +3,6 @@ import { db } from "../config/config.js";
 
 export const createPayment = async (req, res) => {
 
-    console.log("🔥 CREATE PAYMENT");
 
     const userId = req.user.id;
 
