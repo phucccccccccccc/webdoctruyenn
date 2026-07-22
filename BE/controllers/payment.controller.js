@@ -161,7 +161,7 @@ export const webhook = (req, res) => {
 
                         `
                         UPDATE payments
-                        SET status='success'
+                        SET status='paid'
                         WHERE id=?
                         `,
 
