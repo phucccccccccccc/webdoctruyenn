@@ -1,7 +1,20 @@
 import {db} from "../config/config.js"; 
 
 // Lấy danh sách
- 
+export const getCategories = (req, res) => {
+
+    db.query(
+        "SELECT * FROM categories ORDER BY id DESC",
+        (err, result) => {
+
+            if (err) return res.status(500).json(err);
+
+            res.json(result);
+
+        }
+    );
+
+};
 
 // Lấy 1 category
 export const getCategory = (req, res) => {
