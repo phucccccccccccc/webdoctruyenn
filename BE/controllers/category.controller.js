@@ -1,38 +1,28 @@
 import {db} from "../config/config.js"; 
 
 // Lấy danh sách
-export const getCategories = (req, res) => {
-
-    db.query(
-        "SELECT * FROM categories ORDER BY id DESC",
-        (err, result) => {
-
-            if (err) return res.status(500).json(err);
-
-            res.json(result);
-
-        }
-    );
-
-};
+ 
 
 // Lấy 1 category
-export const getCategory = (req, res) => {
+export const getCategories = async (req, res) => {
 
-    db.query(
-        "SELECT * FROM categories WHERE id = ?",
-        [req.params.id],
-        (err, result) => {
+    try {
 
-            if (err) return res.status(500).json(err);
+        const [rows] = await db.query(
+            "SELECT * FROM categories ORDER BY id DESC"
+        );
 
-            res.json(result[0]);
+        res.json(rows);
 
-        }
-    );
+    } catch (err) {
+
+        console.log(err);
+
+        res.sendStatus(500);
+
+    }
 
 };
-
 // Thêm
 export const createCategory = (req, res) => {
 
