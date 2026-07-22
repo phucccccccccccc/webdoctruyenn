@@ -21,7 +21,6 @@ export default function Reader() {
     const navigate = useNavigate();
 
     const [showBuyModal, setShowBuyModal] = useState(false);
-
     const [needTopup, setNeedTopup] = useState(false);
     const [notPurchased, setNotPurchased] = useState(false);
 
@@ -33,85 +32,77 @@ export default function Reader() {
 
     const loadChapter = async () => {
 
-    try {
+        try {
 
-        const [chapterRes, chaptersRes] = await Promise.all([
+            const [chapterRes, chaptersRes] = await Promise.all([
 
-            api.get(`/books/${bookId}/chapter/${chapterNumber}`),
+                api.get(`/books/${bookId}/chapter/${chapterNumber}`),
 
-            api.get(`/books/${bookId}/chapters`)
+                api.get(`/books/${bookId}/chapters`)
 
-        ]);
+            ]);
 
-        setChapter(chapterRes.data.chapter);
+            setChapter(chapterRes.data.chapter);
+            setImages(chapterRes.data.images);
+            setChapters(chaptersRes.data);
 
-        setImages(chapterRes.data.images);
+            setNotPurchased(false);
 
-        setChapters(chaptersRes.data);
+        } catch (err) {
 
-        setNotPurchased(false);
+            console.log(err);
 
-    } catch (err) {
+            if (
+                err.response?.status === 403 &&
+                err.response?.data?.code === "BOOK_NOT_PURCHASED"
+            ) {
 
-        console.log(err);
+                setNotPurchased(true);
+                setCoinPrice(err.response.data.coin_price);
+                setShowBuyModal(true);
 
-        if (
-            err.response?.status === 403 &&
-            err.response?.data?.code === "BOOK_NOT_PURCHASED"
-        ) {
+                return;
 
-            setNotPurchased(true);
+            }
 
-            setCoinPrice(err.response.data.coin_price);
-
-            setShowBuyModal(true);
-
-            return;
-
-        }
-
-        alert(
-            err.response?.data?.message ||
-            "Có lỗi xảy ra"
-        );
-
-    }
-
-};
-const handleBuy = async () => {
-
-    try {
-
-        await api.post("/books/buy", {
-
-            book_id: Number(bookId)
-
-        });
-
-        setShowBuyModal(false);
-
-        setNeedTopup(false);
-
-        setNotPurchased(false);
-
-        loadChapter();
-
-    }
-    catch (err) {
-
-       if (err.response?.data?.code === "NOT_ENOUGH_COIN") {
-
-            setNeedTopup(true);
-
-            return;
+            alert(
+                err.response?.data?.message ||
+                "Có lỗi xảy ra"
+            );
 
         }
 
-        alert(err.response?.data?.message);
+    };
 
-    }
+    const handleBuy = async () => {
 
-};
+        try {
+
+            await api.post("/books/buy", {
+                book_id: Number(bookId)
+            });
+
+            setShowBuyModal(false);
+            setNeedTopup(false);
+            setNotPurchased(false);
+
+            loadChapter();
+
+        } catch (err) {
+
+            if (err.response?.data?.code === "NOT_ENOUGH_COIN") {
+
+                setNeedTopup(true);
+
+                return;
+
+            }
+
+            alert(err.response?.data?.message);
+
+        }
+
+    };
 
     const saveHistory = () => {
 
@@ -132,25 +123,26 @@ const handleBuy = async () => {
 
     useEffect(() => {
 
-    window.scrollTo(0, 0);
-
-    loadChapter();
-    saveHistory();
-
-}, [bookId, chapterNumber]);
-
-useEffect(() => {
-
-    if (images.length) {
         window.scrollTo(0, 0);
-    }
 
-}, [images]);
+        loadChapter();
+        saveHistory();
+
+    }, [bookId, chapterNumber]);
+
+    useEffect(() => {
+
+        if (images.length) {
+
+            window.scrollTo(0, 0);
+
+        }
+
+    }, [images]);
 
     const handlePrev = () => {
 
-        if (Number(chapterNumber) <= 1)
-            return;
+        if (Number(chapterNumber) <= 1) return;
 
         navigate(
             `/books/${bookId}/chapter/${Number(chapterNumber) - 1}`
@@ -174,22 +166,21 @@ useEffect(() => {
 
     };
 
+    if (!chapter && !notPurchased) {
 
-if (!chapter&&!notPurchased) {  
+        return (
 
-    return (
+            <Container className="py-5">
 
-        <Container className="py-5">
+                <h3 className="text-center">
+                    Đang tải...
+                </h3>
 
-            <h3 className="text-center">
-                Đang tải...
-            </h3>
+            </Container>
 
-        </Container>
+        );
 
-    );
-
-}
+    }
 
     return (
 
@@ -201,15 +192,10 @@ if (!chapter&&!notPurchased) {
                     title: chapter.book_title
                 }}
                 chapter={chapter}
-
                 chapters={chapters}
-
                 onPrev={handlePrev}
-
                 onNext={handleNext}
-
                 onChangeChapter={handleChangeChapter}
-
             />
 
             <Container
@@ -222,32 +208,37 @@ if (!chapter&&!notPurchased) {
             >
 
                 <Card
-                    className="mx-auto shadow"
+                    className="mx-auto border-0 rounded-0 shadow-none"
                     style={{
                         maxWidth: 900
                     }}
                 >
 
-                    <Card.Body className="p-0">
+                    <Card.Body
+                        className="p-0"
+                        style={{
+                            background: "transparent"
+                        }}
+                    >
 
-                        <div className="py-3">
+                        <div
+                            className="py-3"
+                            style={{
+                                background: "#111",
+                                color: "#fff"
+                            }}
+                        >
 
                             <h2 className="text-center">
-
                                 {chapter.book_title}
-
                             </h2>
 
                             <h4 className="text-center">
-
                                 {chapter.title}
-
                             </h4>
 
                             <div className="text-center text-muted">
-
                                 Chapter {chapter.chapter_number}
-
                             </div>
 
                         </div>
@@ -275,6 +266,65 @@ if (!chapter&&!notPurchased) {
                 </Card>
 
             </Container>
+
+            <Modal
+                show={showBuyModal}
+                centered
+                backdrop="static"
+            >
+
+                <Modal.Header>
+
+                    <Modal.Title>
+                        Mua truyện
+                    </Modal.Title>
+
+                </Modal.Header>
+
+                <Modal.Body>
+
+                    {
+                        !needTopup ? (
+
+                            <>
+
+                                <p>
+                                    Bạn cần <b>{coinPrice} Coin</b> để mở khóa truyện này.
+                                </p>
+
+                                <Button
+                                    className="w-100"
+                                    onClick={handleBuy}
+                                >
+                                    Mua ngay
+                                </Button>
+
+                            </>
+
+                        ) : (
+
+                            <>
+
+                                <p className="text-danger">
+                                    Bạn không đủ Coin.
+                                </p>
+
+                                <Button
+                                    variant="warning"
+                                    className="w-100"
+                                    onClick={() => navigate("/buy")}
+                                >
+                                    Nạp Coin
+                                </Button>
+
+                            </>
+
+                        )
+                    }
+
+                </Modal.Body>
+
+            </Modal>
 
         </>
 
