@@ -248,7 +248,7 @@ export default function Reader() {
 
                                 <img
                                     key={img.page_number}
-                                    src={page.image_url}
+                                    src={img.image_url}
                                     alt=""
                                     style={{
                                         width: "100%",
