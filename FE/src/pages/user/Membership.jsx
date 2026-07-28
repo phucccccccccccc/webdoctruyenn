@@ -8,7 +8,6 @@ import {
     Button
 } from "react-bootstrap";
 import { Link } from "react-router-dom";
-import { UPLOAD_URL } from "../../config";
 export default function Membership() {
 
     const user = JSON.parse(localStorage.getItem("user"));
@@ -61,7 +60,7 @@ export default function Membership() {
 
                                     <Card.Img
                                         variant="top"
-                                src={`${UPLOAD_URL}/${book.cover_image}`}
+                                src={book.cover_image}
                                 style={{
                                     height: "320px",
                                     width: "100%",
