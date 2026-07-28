@@ -4,7 +4,6 @@ import {
     useParams,
     useNavigate
 } from "react-router-dom";
-import { UPLOAD_URL } from "../../config";
 import ReaderHeader from "../../components/ReaderHeader";
 
 import {
@@ -249,7 +248,7 @@ export default function Reader() {
 
                                 <img
                                     key={img.page_number}
-                                    src={`${UPLOAD_URL}/${img.image_url}`}
+                                    src={page.image_url}
                                     alt=""
                                     style={{
                                         width: "100%",

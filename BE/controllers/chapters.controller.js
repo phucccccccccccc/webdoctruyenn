@@ -1,6 +1,5 @@
 import { db } from "../config/config.js";
-import fs from "fs";
-import path from "path";
+import { uploadToCloudinary } from "../utils/cloudinaryUpload.js";
 export const getChapters = (req, res) => {
 
     const { bookId } = req.params;
@@ -81,358 +80,225 @@ export const getChapter = (req, res) => {
     });
 
 };
-export const createChapter = (req, res) => {
+export const createChapter = async (req, res) => {
 
-    const {
-        book_id,
-        chapter_number,
-        title
-    } = req.body;
+    try {
 
-    const sql = `
-        INSERT INTO chapters
-        (
+        const {
             book_id,
             chapter_number,
             title
-        )
-        VALUES
-        (
-            ?,?,?
-        )
-    `;
+        } = req.body;
 
-    db.query(
+        const sql = `
+            INSERT INTO chapters
+            (
+                book_id,
+                chapter_number,
+                title
+            )
+            VALUES (?,?,?)
+        `;
 
-        sql,
+        db.query(
+            sql,
+            [
+                book_id,
+                chapter_number,
+                title
+            ],
+            async (err, result) => {
 
-        [
-            book_id,
-            chapter_number,
-            title
-        ],
+                if (err)
+                    return res.status(500).json(err);
 
-        (err, result) => {
+                const chapterId = result.insertId;
 
-            if (err)
-                return res.status(500).json(err);
+                if (!req.files || req.files.length === 0) {
 
-            const chapterId = result.insertId;
-
-            if (!req.files || req.files.length === 0) {
-
-                return res.json({
-                    message: "Thêm chương thành công"
-                });
-
-            }
-
-            // =========================
-            // Tạo thư mục
-            // uploads/chapters/book_3/chapter_1
-            // =========================
-
-            const chapterFolder = path.join(
-
-                "uploads",
-
-                "chapters",
-
-                `book_${book_id}`,
-
-                `chapter_${chapter_number}`
-
-            );
-
-            fs.mkdirSync(
-                chapterFolder,
-                {
-                    recursive: true
-                }
-            );
-
-            const values = [];
-
-            req.files.forEach((file, index) => {
-
-                const ext = path.extname(file.originalname);
-
-                const fileName =
-                    `page_${String(index + 1).padStart(3, "0")}${ext}`;
-
-                // đường dẫn lưu trên server
-
-                const newPath = path.join(
-
-                    chapterFolder,
-
-                    fileName
-
-                );
-
-                // Di chuyển file
-
-                fs.renameSync(
-
-                    file.path,
-
-                    newPath
-
-                );
-
-                // đường dẫn lưu DB
-
-                const relativePath =
-
-                    `chapters/book_${book_id}/chapter_${chapter_number}/${fileName}`;
-
-                values.push([
-
-                    chapterId,
-
-                    index + 1,
-
-                    relativePath
-
-                ]);
-
-            });
-
-            db.query(
-
-                `
-                INSERT INTO chapter_images
-                (
-                    chapter_id,
-                    page_number,
-                    image_url
-                )
-                VALUES ?
-                `,
-
-                [values],
-
-                (err2) => {
-
-                    if (err2)
-                        return res.status(500).json(err2);
-
-                    res.json({
-
+                    return res.json({
                         message: "Thêm chương thành công"
-
                     });
 
                 }
 
-            );
+                const values = [];
 
-        }
+                for (let i = 0; i < req.files.length; i++) {
 
-    );
+                    const file = req.files[i];
 
-};
-export const updateChapter = (req, res) => {
-
-    const { id } = req.params;
-
-    const {
-        chapter_number,
-        title
-    } = req.body;
-
-    // Lấy thông tin chapter cũ
-    db.query(
-
-        "SELECT * FROM chapters WHERE id = ?",
-
-        [id],
-
-        (err, chapterResult) => {
-
-            if (err)
-                return res.status(500).json(err);
-
-            if (chapterResult.length === 0) {
-
-                return res.status(404).json({
-                    message: "Không tìm thấy chương"
-                });
-
-            }
-
-            const chapter = chapterResult[0];
-
-            // Cập nhật thông tin chương
-            db.query(
-
-                `
-                UPDATE chapters
-                SET
-                    chapter_number = ?,
-                    title = ?
-                WHERE id = ?
-                `,
-
-                [
-                    chapter_number,
-                    title,
-                    id
-                ],
-
-                (err2) => {
-
-                    if (err2)
-                        return res.status(500).json(err2);
-
-                    // Không upload ảnh mới
-                    if (!req.files || req.files.length === 0) {
-
-                        return res.json({
-                            message: "Cập nhật thành công"
-                        });
-
-                    }
-
-                    // Xóa thư mục cũ
-                    const oldFolder = path.join(
-
-                        "uploads",
-
-                        "chapters",
-
-                        `book_${chapter.book_id}`,
-
-                        `chapter_${chapter.chapter_number}`
-
+                    const upload = await uploadToCloudinary(
+                        file.buffer,
+                        `chapters/book_${book_id}/chapter_${chapter_number}`
                     );
 
-                    if (fs.existsSync(oldFolder)) {
-
-                        fs.rmSync(oldFolder, {
-
-                            recursive: true,
-                            force: true
-
-                        });
-
-                    }
-
-                    // Tạo thư mục mới
-                    const newFolder = path.join(
-
-                        "uploads",
-
-                        "chapters",
-
-                        `book_${chapter.book_id}`,
-
-                        `chapter_${chapter_number}`
-
-                    );
-
-                    fs.mkdirSync(
-
-                        newFolder,
-
-                        {
-                            recursive: true
-                        }
-
-                    );
-
-                    // Xóa dữ liệu ảnh cũ
-                    db.query(
-
-                        "DELETE FROM chapter_images WHERE chapter_id = ?",
-
-                        [id],
-
-                        (err3) => {
-
-                            if (err3)
-                                return res.status(500).json(err3);
-
-                            const values = [];
-
-                            req.files.forEach((file, index) => {
-
-                                const ext = path.extname(file.originalname);
-
-                                const fileName =
-                                    `page_${String(index + 1).padStart(3, "0")}${ext}`;
-
-                                const newPath = path.join(
-
-                                    newFolder,
-
-                                    fileName
-
-                                );
-
-                                fs.renameSync(
-
-                                    file.path,
-
-                                    newPath
-
-                                );
-
-                                const relativePath =
-                                    `chapters/book_${chapter.book_id}/chapter_${chapter_number}/${fileName}`;
-
-                                values.push([
-
-                                    id,
-
-                                    index + 1,
-
-                                    relativePath
-
-                                ]);
-
-                            });
-
-                            db.query(
-
-                                `
-                                INSERT INTO chapter_images
-                                (
-                                    chapter_id,
-                                    page_number,
-                                    image_url
-                                )
-                                VALUES ?
-                                `,
-
-                                [values],
-
-                                (err4) => {
-
-                                    if (err4)
-                                        return res.status(500).json(err4);
-
-                                    res.json({
-
-                                        message: "Cập nhật thành công"
-
-                                    });
-
-                                }
-
-                            );
-
-                        }
-
-                    );
+                    values.push([
+                        chapterId,
+                        i + 1,
+                        upload.secure_url
+                    ]);
 
                 }
 
-            );
+                db.query(
+                    `
+                    INSERT INTO chapter_images
+                    (
+                        chapter_id,
+                        page_number,
+                        image_url
+                    )
+                    VALUES ?
+                    `,
+                    [values],
+                    (err2) => {
 
-        }
+                        if (err2)
+                            return res.status(500).json(err2);
 
-    );
+                        res.json({
+                            message: "Thêm chương thành công"
+                        });
+
+                    }
+                );
+
+            }
+        );
+
+    } catch (err) {
+
+        console.error(err);
+
+        res.status(500).json({
+            message: err.message
+        });
+
+    }
+
+};
+export const updateChapter = async (req, res) => {
+
+    try {
+
+        const { id } = req.params;
+
+        const {
+            chapter_number,
+            title
+        } = req.body;
+
+        db.query(
+            "SELECT * FROM chapters WHERE id = ?",
+            [id],
+            (err, chapterResult) => {
+
+                if (err)
+                    return res.status(500).json(err);
+
+                if (chapterResult.length === 0) {
+
+                    return res.status(404).json({
+                        message: "Không tìm thấy chương"
+                    });
+
+                }
+
+                const chapter = chapterResult[0];
+
+                db.query(
+                    `
+                    UPDATE chapters
+                    SET
+                        chapter_number = ?,
+                        title = ?
+                    WHERE id = ?
+                    `,
+                    [
+                        chapter_number,
+                        title,
+                        id
+                    ],
+                    async (err2) => {
+
+                        if (err2)
+                            return res.status(500).json(err2);
+
+                        if (!req.files || req.files.length === 0) {
+
+                            return res.json({
+                                message: "Cập nhật thành công"
+                            });
+
+                        }
+
+                        db.query(
+                            "DELETE FROM chapter_images WHERE chapter_id = ?",
+                            [id],
+                            async (err3) => {
+
+                                if (err3)
+                                    return res.status(500).json(err3);
+
+                                const values = [];
+
+                                for (let i = 0; i < req.files.length; i++) {
+
+                                    const upload = await uploadToCloudinary(
+                                        req.files[i].buffer,
+                                        `chapters/book_${chapter.book_id}/chapter_${chapter_number}`
+                                    );
+
+                                    values.push([
+                                        id,
+                                        i + 1,
+                                        upload.secure_url
+                                    ]);
+
+                                }
+
+                                db.query(
+                                    `
+                                    INSERT INTO chapter_images
+                                    (
+                                        chapter_id,
+                                        page_number,
+                                        image_url
+                                    )
+                                    VALUES ?
+                                    `,
+                                    [values],
+                                    (err4) => {
+
+                                        if (err4)
+                                            return res.status(500).json(err4);
+
+                                        res.json({
+                                            message: "Cập nhật thành công"
+                                        });
+
+                                    }
+                                );
+
+                            }
+                        );
+
+                    }
+                );
+
+            }
+        );
+
+    } catch (err) {
+
+        console.error(err);
+
+        res.status(500).json({
+            message: err.message
+        });
+
+    }
 
 };
 export const deleteChapter = (req, res) => {
@@ -440,87 +306,63 @@ export const deleteChapter = (req, res) => {
     const { id } = req.params;
 
     db.query(
-
-        "SELECT * FROM chapters WHERE id = ?",
-
+        "SELECT image_url FROM chapter_images WHERE chapter_id = ?",
         [id],
-
-        (err, chapterResult) => {
+        async (err, images) => {
 
             if (err)
                 return res.status(500).json(err);
 
-            if (chapterResult.length === 0) {
+            try {
 
-                return res.status(404).json({
-                    message: "Không tìm thấy chương"
-                });
+                for (const img of images) {
 
-            }
+                    if (img.image_url?.includes("res.cloudinary.com")) {
 
-            const chapter = chapterResult[0];
+                        const publicId = img.image_url
+                            .split("/upload/")[1]
+                            .split(".")[0]
+                            .replace(/^v\d+\//, "");
 
-            const folder = path.join(
+                        await cloudinary.uploader.destroy(publicId);
 
-                "uploads",
+                    }
 
-                "chapters",
+                }
 
-                `book_${chapter.book_id}`,
+            } catch (e) {
 
-                `chapter_${chapter.chapter_number}`
-
-            );
-
-            if (fs.existsSync(folder)) {
-
-                fs.rmSync(folder, {
-
-                    recursive: true,
-                    force: true
-
-                });
+                console.log(e);
 
             }
 
             db.query(
-
                 "DELETE FROM chapter_images WHERE chapter_id = ?",
-
                 [id],
-
                 (err2) => {
 
                     if (err2)
                         return res.status(500).json(err2);
 
                     db.query(
-
                         "DELETE FROM chapters WHERE id = ?",
-
                         [id],
-
                         (err3) => {
 
                             if (err3)
                                 return res.status(500).json(err3);
 
                             res.json({
-
                                 message: "Xóa chương thành công"
-
                             });
 
                         }
-
                     );
 
                 }
-
             );
 
         }
-
     );
 
 };

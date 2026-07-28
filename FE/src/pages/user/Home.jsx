@@ -8,8 +8,6 @@ import {
     
 } from "react-icons/fa";
 import { Link } from "react-router-dom";
-import { UPLOAD_URL } from "../../config";
-
 export default function Home() {
 
 
@@ -96,7 +94,7 @@ const renderBooks = (books) => (
 
                         <Card.Img
                             variant="top"
-                            src={`${UPLOAD_URL}/${book.cover_image}`}
+                            src={book.cover_image}
                             style={{
                                 height: "320px",
                                 width: "100%",

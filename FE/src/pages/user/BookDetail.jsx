@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 export const API_URL = import.meta.env.VITE_API_URL;
 
-import { UPLOAD_URL } from "../../config";
 
 import api from "../../api/api";
 
@@ -138,7 +137,7 @@ const handleBuy = async () => {
                     <Card className="shadow">
 
                         <Card.Img
-                            src={`${UPLOAD_URL}/${book.cover_image}`}
+                            src={book.cover_image}
                         />
 
                     </Card>

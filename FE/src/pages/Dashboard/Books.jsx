@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import api from "../../api/api";
 import BookForm from "../../components/books/BookForm";
 import { Link } from "react-router-dom";
-import { UPLOAD_URL } from "../../config";
 import {
     Table,
     Button,
@@ -211,7 +210,7 @@ const filteredBooks = books.filter((book) => {
                                         <td>
 
                                             <Image
-                                                src={`${UPLOAD_URL}/${book.cover_image}`}
+                                                src={book.cover_image}
                                                 width={60}
                                                 height={80}
                                                 rounded

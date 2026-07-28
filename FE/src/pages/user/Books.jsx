@@ -21,7 +21,6 @@ import {
     useNavigate 
 } from "react-router-dom";
 
-import { UPLOAD_URL } from "../../config";
 
 export default function Books() {
 
@@ -183,7 +182,7 @@ useEffect(() => {
 
                         <Card.Img
                             variant="top"
-                            src={`${UPLOAD_URL}/${book.cover_image}`}
+                            src={book.cover_image}
                             style={{
                                 height: "320px",
                                 width: "100%",

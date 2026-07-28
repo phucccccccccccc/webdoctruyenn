@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import api from "../../api/api";
 export const API_URL = import.meta.env.VITE_API_URL;
-export const UPLOAD_URL = `${API_URL}/uploads`;
 import {
     Offcanvas,
     Form,
@@ -49,7 +48,7 @@ export default function BookForm({
             editingBook.category_ids || []
         );
 
-        setPreview(`${UPLOAD_URL}/${editingBook.cover_image}`);
+setPreview(editingBook.cover_image);
     }, [editingBook]);
 
     const resetForm = () => {

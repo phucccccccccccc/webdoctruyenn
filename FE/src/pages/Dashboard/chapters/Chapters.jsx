@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import api from "../../../api/api";
 import ChapterForm from "../../../components/chapters/ChapterForm";
-import { UPLOAD_URL } from "../../../config";
 import {
     Card,
     Table,
@@ -184,7 +183,7 @@ export default function Chapters() {
                         <Col md={2}>
 
                             <Image
-                                src={`${UPLOAD_URL}/${book.cover_image}`}
+                                src={book.cover_image}
                                 thumbnail
                             />
 

@@ -1,5 +1,5 @@
 import {db} from "../config/config.js";
-
+import { uploadToCloudinary } from "../utils/cloudinaryUpload.js";
 export const getBooks = (req, res) => {
 
     const sql = `
@@ -71,7 +71,6 @@ export const getFeaturedBooks = (req, res) => {
     });
 
 };
-
 export const getNewBooks = (req, res) => {
 
     const sql = `
@@ -233,7 +232,6 @@ export const searchBooks = (req, res) => {
     });
 
 };
-
 export const getBooksByViews = (req, res) => {
 
     const sql = `
@@ -448,100 +446,114 @@ export const updateReadingHistory = (req, res) => {
     // dùng userId thay vì req.body.user_id
 
 };
-export const createBook = (req, res) => {
+export const createBook = async (req, res) => {
+    try {
 
-    const {
-        title,
-        author,
-        description,
-        coin_price,
-        status
-    } = req.body;
-
-    const cover_image = req.file
-        ? req.file.filename
-        : null;
-
-    const categories = JSON.parse(req.body.categories || "[]");
-
-    const sql = `
-        INSERT INTO books
-        (
+        const {
             title,
             author,
             description,
-            cover_image,
             coin_price,
             status
-        )
-        VALUES (?,?,?,?,?,?)
-    `;
+        } = req.body;
 
-    db.query(
-        sql,
-        [
-            title,
-            author,
-            description,
-            cover_image,
-            coin_price,
-            status
-        ],
-        (err, result) => {
+        let cover_image = null;
 
-            if (err)
-                return res.status(500).json(err);
+        if (req.file) {
 
-            const bookId = result.insertId;
+            const result = await uploadToCloudinary(
+                req.file.buffer,
+                "covers"
+            );
 
-            if (categories.length === 0) {
+            console.log(result);
 
-                return res.json({
-                    message: "Thêm truyện thành công"
-                });
+            cover_image = result.secure_url;
 
-            }
+        }
 
-            const values = categories.map(categoryId => [
+        const categories = JSON.parse(req.body.categories || "[]");
 
-                bookId,
+        const sql = `
+            INSERT INTO books
+            (
+                title,
+                author,
+                description,
+                cover_image,
+                coin_price,
+                status
+            )
+            VALUES (?,?,?,?,?,?)
+        `;
 
-                categoryId
+        db.query(
+            sql,
+            [
+                title,
+                author,
+                description,
+                cover_image,
+                coin_price,
+                status
+            ],
+            (err, result) => {
 
-            ]);
+                if (err)
+                    return res.status(500).json(err);
 
-            db.query(
+                const bookId = result.insertId;
 
-                `
-                INSERT INTO book_categories
-                (
-                    book_id,
-                    category_id
-                )
-                VALUES ?
-                `,
+                if (categories.length === 0) {
 
-                [values],
-
-                (err) => {
-
-                    if (err)
-                        return res.status(500).json(err);
-
-                    res.json({
-
+                    return res.json({
                         message: "Thêm truyện thành công"
-
                     });
 
                 }
 
-            );
+                const values = categories.map(categoryId => [
 
-        }
+                    bookId,
 
-    );
+                    categoryId
 
+                ]);
+
+                db.query(
+                    `
+                    INSERT INTO book_categories
+                    (
+                        book_id,
+                        category_id
+                    )
+                    VALUES ?
+                    `,
+                    [values],
+                    (err2) => {
+
+                        if (err2)
+                            return res.status(500).json(err2);
+
+                        res.json({
+                            message: "Thêm truyện thành công"
+                        });
+
+                    }
+                );
+
+            }
+        );
+
+    } catch (err) {
+
+        console.error(err);
+
+        res.status(500).json({
+            message: err.message
+        });
+
+    }
 };
 export const buyBook = (req, res) => {
 
@@ -751,88 +763,176 @@ export const buyBook = (req, res) => {
     });
 
 };
-export const updateBook = (req, res) => {
+export const updateBook = async (req, res) => {
 
-    const { id } = req.params;
+    try {
 
-    const {
-        title,
-        author,
-        description,
-        coin_price
-    } = req.body;
+        const { id } = req.params;
 
-    const categories = JSON.parse(req.body.categories || "[]");
-
-    let cover_image = req.body.old_cover_image;
-
-    if (req.file) {
-        cover_image = req.file.filename;
-    }
-
-    const sql = `
-        UPDATE books
-        SET
-            title = ?,
-            author = ?,
-            description = ?,
-            coin_price = ?,
-            cover_image = ?
-        WHERE id = ?
-    `;
-
-    db.query(
-        sql,
-        [
+        const {
             title,
             author,
             description,
-            coin_price,
-            cover_image,
-            id
-        ],
-        (err) => {
+            coin_price
+        } = req.body;
 
-            if (err) {
+        const categories = JSON.parse(req.body.categories || "[]");
+
+        let cover_image = req.body.old_cover_image;
+
+        if (req.file) {
+
+            const result = await uploadToCloudinary(
+                req.file.buffer,
+                "covers"
+            );
+
+            cover_image = result.secure_url;
+
+        }
+
+        const sql = `
+            UPDATE books
+            SET
+                title = ?,
+                author = ?,
+                description = ?,
+                coin_price = ?,
+                cover_image = ?
+            WHERE id = ?
+        `;
+
+        db.query(
+            sql,
+            [
+                title,
+                author,
+                description,
+                coin_price,
+                cover_image,
+                id
+            ],
+            (err) => {
+
+                if (err) {
+                    return res.status(500).json(err);
+                }
+
+                db.query(
+                    "DELETE FROM book_categories WHERE book_id = ?",
+                    [id],
+                    (err) => {
+
+                        if (err) {
+                            return res.status(500).json(err);
+                        }
+
+                        if (categories.length === 0) {
+
+                            return res.json({
+                                message: "Cập nhật thành công"
+                            });
+
+                        }
+
+                        const values = categories.map(categoryId => [
+                            id,
+                            categoryId
+                        ]);
+
+                        db.query(
+                            "INSERT INTO book_categories(book_id, category_id) VALUES ?",
+                            [values],
+                            (err) => {
+
+                                if (err) {
+                                    return res.status(500).json(err);
+                                }
+
+                                res.json({
+                                    message: "Cập nhật thành công"
+                                });
+
+                            }
+                        );
+
+                    }
+                );
+
+            }
+        );
+
+    } catch (err) {
+
+        console.error(err);
+
+        res.status(500).json({
+            message: err.message
+        });
+
+    }
+
+};
+export const deleteBook = (req, res) => {
+
+    const { id } = req.params;
+
+    db.query(
+        "SELECT cover_image FROM books WHERE id = ?",
+        [id],
+        async (err, result) => {
+
+            if (err)
                 return res.status(500).json(err);
+
+            if (result.length === 0) {
+
+                return res.status(404).json({
+                    message: "Không tìm thấy truyện"
+                });
+
             }
 
-            // Xóa category cũ
+            const cover = result[0].cover_image;
+
+            // Xóa ảnh trên Cloudinary
+            if (cover && cover.includes("res.cloudinary.com")) {
+
+                try {
+
+                    const publicId = cover
+                        .split("/upload/")[1]
+                        .split(".")[0]
+                        .replace(/^v\d+\//, "");
+
+                    await cloudinary.uploader.destroy(publicId);
+
+                } catch (e) {
+
+                    console.log(e);
+
+                }
+
+            }
+
             db.query(
                 "DELETE FROM book_categories WHERE book_id = ?",
                 [id],
                 (err) => {
 
-                    if (err) {
+                    if (err)
                         return res.status(500).json(err);
-                    }
-
-                    // Không chọn category nào
-                    if (categories.length === 0) {
-
-                        return res.json({
-                            message: "Cập nhật thành công"
-                        });
-
-                    }
-
-                    // Thêm category mới
-                    const values = categories.map(categoryId => [
-                        id,
-                        categoryId
-                    ]);
 
                     db.query(
-                        "INSERT INTO book_categories(book_id, category_id) VALUES ?",
-                        [values],
-                        (err) => {
+                        "DELETE FROM books WHERE id = ?",
+                        [id],
+                        (err2) => {
 
-                            if (err) {
-                                return res.status(500).json(err);
-                            }
+                            if (err2)
+                                return res.status(500).json(err2);
 
                             res.json({
-                                message: "Cập nhật thành công"
+                                message: "Xóa thành công"
                             });
 
                         }
@@ -844,29 +944,6 @@ export const updateBook = (req, res) => {
         }
     );
 
-};
-export const deleteBook = (req, res) => {
-    const { id } = req.params;
-
-    db.query(
-        "DELETE FROM book_categories WHERE book_id = ?",
-        [id],
-        (err) => {
-            if (err) return res.status(500).json(err);
-
-            db.query(
-                "DELETE FROM books WHERE id = ?",
-                [id],
-                (err2) => {
-                    if (err2) return res.status(500).json(err2);
-
-                    res.json({
-                        message: "Xóa thành công"
-                    });
-                }
-            );
-        }
-    );
 };
 export const getComingSoonBooks = (req, res) => {
 
