@@ -1,79 +1,64 @@
-import { useEffect, useState } from "react";
-import api from "../../api/api";
-import { Row, Col, Card } from "react-bootstrap";
+import { Row, Col } from "react-bootstrap";
 
-export default function Overview(){
+import StatsCard from "./Overview/StatsCard";
+import RevenueChart from "./Overview/RevenueChart";
+import SalesSummary from "./Overview/SalesSummary";
+import TopSales from "./Overview/TopSales";
+import TopReading from "./Overview/TopReading";
+import RecentTransaction from "./Overview/RecentTransaction";
 
-    const [stats,setStats] = useState({});
+export default function Overview() {
 
-    useEffect(()=>{
+    return (
 
-        api.get("/dashboard/stats")
+        <>
 
-        .then((res)=>{
+            <StatsCard />
 
-            setStats(res.data);
+            <Row className="mt-4">
 
-        })
+                <Col lg={8}>
 
-        .catch((err)=>{
+                    <RevenueChart />
 
-            console.log(err);
+                </Col>
 
-        })
+                <Col lg={4}>
 
-    },[])
+                    <SalesSummary />
 
-    return(
+                </Col>
 
-        <Row>
-            <Col md={3}>
-                <Card className="shadow">
-                    <Card.Body>
-                        <h6>Tổng số sách</h6>
-                        <h2>
-                            {stats.totalBooks}
-                        </h2>
-                    </Card.Body>
-                </Card>
-            </Col>
+            </Row>
 
-            <Col md={3}>
-                <Card className="shadow">
-                    <Card.Body>
-                        <h6>Tổng số user</h6>
-                        <h2>
-                            {stats.totalUsers}
-                        </h2>
-                    </Card.Body>
-                </Card>
+            <Row className="mt-4">
 
-            </Col>
+                <Col lg={6}>
 
-            <Col md={3}>
-                <Card className="shadow">
-                    <Card.Body>
-                        <h6>Tổng số coin</h6>
-                        <h2>
-                            {stats.totalCoins}
-                        </h2>
-                    </Card.Body>
-                </Card>
-            </Col>
+                    <TopSales />
 
-            <Col md={3}>
-                <Card className="shadow">
-                    <Card.Body>
-                        <h6>Tổng giao dịch</h6>
-                        <h2>
-                            {stats.totalTransactions}
-                        </h2>
-                    </Card.Body>
-                </Card>
-            </Col>
+                </Col>
 
-        </Row>
+                <Col lg={6}>
 
-    )
+                    <TopReading />
+
+                </Col>
+
+            </Row>
+
+            <Row className="mt-4">
+
+                <Col>
+
+                    <RecentTransaction />
+
+                </Col>
+
+            </Row>
+
+        </>
+
+    );
 
 }

@@ -71,6 +71,14 @@ export default function Sidebar() {
                     <FaChartPie className="me-2" />
                     Tổng quan
                 </Nav.Link>
+                <Nav.Link
+                    as={NavLink}
+                    to="/dashboard/categories"
+                    className="sidebar-link"
+                >
+                    <FaList className="me-2" />
+                    Danh mục
+                </Nav.Link>
 
                 <Nav.Link
                     as={NavLink}
@@ -81,14 +89,7 @@ export default function Sidebar() {
                     Quản lý truyện
                 </Nav.Link>
 
-                <Nav.Link
-                    as={NavLink}
-                    to="/dashboard/categories"
-                    className="sidebar-link"
-                >
-                    <FaList className="me-2" />
-                    Danh mục
-                </Nav.Link>
+                
 
                 <Nav.Link
                     as={NavLink}

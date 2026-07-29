@@ -101,74 +101,62 @@ export const createChapter = async (req, res) => {
             VALUES (?,?,?)
         `;
 
+        db.query(sql, [book_id, chapter_number, title], async (err, result) => {
+
+    if (err)
+        return res.status(500).json(err);
+
+    try {
+
+        const chapterId = result.insertId;
+
+        if (!req.files || req.files.length === 0) {
+            return res.json({
+                message: "Thêm chương thành công"
+            });
+        }
+
+        const values = [];
+
+        for (const file of req.files) {
+
+            const upload = await uploadToCloudinary(
+                file.buffer,
+                `chapters/book_${book_id}/chapter_${chapter_number}`
+            );
+
+            values.push([
+                chapterId,
+                values.length + 1,
+                upload.secure_url,
+                upload.public_id
+            ]);
+        }
+
         db.query(
-            sql,
-            [
-                book_id,
-                chapter_number,
-                title
-            ],
-            async (err, result) => {
+            `INSERT INTO chapter_images
+            (chapter_id,page_number,image_url,public_id)
+            VALUES ?`,
+            [values],
+            (err2) => {
 
-                if (err)
-                    return res.status(500).json(err);
+                if (err2)
+                    return res.status(500).json(err2);
 
-                const chapterId = result.insertId;
-
-                if (!req.files || req.files.length === 0) {
-
-                    return res.json({
-                        message: "Thêm chương thành công"
-                    });
-
-                }
-
-                const values = [];
-
-                for (let i = 0; i < req.files.length; i++) {
-
-                    const file = req.files[i];
-
-                    const upload = await uploadToCloudinary(
-                        file.buffer,
-                        `chapters/book_${book_id}/chapter_${chapter_number}`
-                    );
-
-                   values.push([
-                        chapterId,
-                        i + 1,
-                        upload.secure_url,
-                        upload.public_id
-                    ]);
-
-                }
-
-                db.query(
-                    `
-                    INSERT INTO chapter_images
-                    (
-                        chapter_id,
-                        page_number,
-                        image_url,
-                        public_id
-                    )
-                    VALUES ?
-                    `,
-                    [values],
-                    (err2) => {
-
-                        if (err2)
-                            return res.status(500).json(err2);
-
-                        res.json({
-                            message: "Thêm chương thành công"
-                        });
-
-                    }
-                );
-
+                res.json({
+                    message: "Thêm chương thành công"
+                });
             }
         );
+
+    } catch (e) {
+        console.error(e);
+        return res.status(500).json({
+            message: e.message
+        });
+    }
+
+});
 
     } catch (err) {
 

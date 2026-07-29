@@ -504,6 +504,23 @@ setInsertAfter(e.target.value)
 </Form.Text>
 
                 </Form.Group>
+                <Button
+    variant="outline-danger"
+    size="sm"
+    onClick={() => {
+
+        setGallery([]);
+
+        setImages([]);
+
+        setPreviewImages([]);
+
+        setOldImages([]);
+
+    }}
+>
+    Xóa tất cả ảnh
+</Button>
 
                 {
                     oldImages.length > 0 &&
@@ -665,23 +682,7 @@ setInsertAfter(e.target.value)
                     </Button>
 
                 </div>
-<Button
-    variant="outline-danger"
-    size="sm"
-    onClick={() => {
 
-        setGallery([]);
-
-        setImages([]);
-
-        setPreviewImages([]);
-
-        setOldImages([]);
-
-    }}
->
-    Xóa tất cả ảnh
-</Button>
 
             </Form>
 
