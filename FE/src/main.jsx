@@ -74,6 +74,7 @@ createRoot(document.getElementById('root')).render(
                         path="/categories"
                         element={<Categories />}
                     />
+                    
                                     
                     <Route
                         path="books/:bookId/chapter/:chapterNumber"
@@ -181,6 +182,7 @@ element={
                         path="/dashboard/books/:bookId/chapters"
                         element={<Chapters />}
                     />
+                    
                     
                 </Route>
 

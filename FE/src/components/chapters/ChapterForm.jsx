@@ -201,7 +201,7 @@ const deleteImage = (id) => {
 
     }
 
-    if (!editingChapter && images.length === 0) {
+    if (!editingChapter && gallery.length === 0) {
 
         return alert("Chọn ít nhất 1 ảnh");
 
@@ -499,7 +499,7 @@ setInsertAfter(e.target.value)
                     </Form.Text>
                     <Form.Text className="text-success">
 
-Đã chọn {images.length} ảnh
+Đã chọn {gallery.length} ảnh
 
 </Form.Text>
 
