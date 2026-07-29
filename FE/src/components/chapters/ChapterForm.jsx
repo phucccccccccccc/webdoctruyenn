@@ -10,6 +10,21 @@ import {
     Image,
     Card
 } from "react-bootstrap";
+import {
+    DndContext,
+    closestCenter
+} from "@dnd-kit/core";
+
+import {
+    SortableContext,
+    rectSortingStrategy,
+    arrayMove
+} from "@dnd-kit/sortable";
+
+import { PhotoProvider, PhotoView } from "react-photo-view";
+import "react-photo-view/dist/react-photo-view.css";
+
+import SortableImageCard from "./SortableImageCard";
 
 export default function ChapterForm({
 
@@ -21,6 +36,9 @@ export default function ChapterForm({
 
 }) {
 
+    const [gallery, setGallery] = useState([]);
+    const [insertMode, setInsertMode] = useState(false);
+    const [insertAfter, setInsertAfter] = useState("");
     const [chapterNumber, setChapterNumber] = useState("");
 
     const [title, setTitle] = useState("");
@@ -32,6 +50,11 @@ export default function ChapterForm({
     const [oldImages, setOldImages] = useState([]);
 
     const [loading, setLoading] = useState(false);
+    const preview = (url) => {
+
+    window.open(url);
+
+};
 
     useEffect(() => {
 
@@ -51,8 +74,13 @@ export default function ChapterForm({
             editingChapter.chapter.title
         );
 
-        setOldImages(
-            editingChapter.images
+        setOldImages(editingChapter.images);
+
+        setGallery(
+            editingChapter.images.map(img => ({
+                ...img,
+                isOld: true
+            }))
         );
 
         setPreviewImages([]);
@@ -85,20 +113,72 @@ export default function ChapterForm({
 
     };
 
-    const handleImageChange = (e) => {
+const handleImageChange = (e) => {
 
     const files = Array.from(e.target.files);
 
-    if (files.length === 0)
+    const newImages = files.map((file, index) => ({
+        id: `new-${Date.now()}-${index}`,
+        image_url: URL.createObjectURL(file),
+        file: file,
+        isNew: true
+    }));
+
+    setGallery(prev => [
+        ...prev,
+        ...newImages
+    ]);
+
+};
+const handleDragEnd = (event) => {
+
+    const {
+
+        active,
+        over
+
+    } = event;
+
+    if (!over)
         return;
 
-    setImages(files);
+    if (active.id === over.id)
+        return;
 
-    setPreviewImages(
+    const oldIndex = gallery.findIndex(
 
-        files.map(file =>
+        x => x.id === active.id
 
-            URL.createObjectURL(file)
+    );
+
+    const newIndex = gallery.findIndex(
+
+        x => x.id === over.id
+
+    );
+
+    setGallery(
+
+        arrayMove(
+
+            gallery,
+
+            oldIndex,
+
+            newIndex
+
+        )
+
+    );
+
+};
+const deleteImage = (id) => {
+
+    setGallery(
+
+        gallery.filter(
+
+            x => x.id !== id
 
         )
 
@@ -144,15 +224,30 @@ export default function ChapterForm({
             "title",
             title
         );
+        formData.append(
+    "image_order",
+   JSON.stringify(
+    gallery?.map((x) => ({
+        id: x.id,
+        isNew: x.isNew || false
+    })) || []
+)
+);
 
-        images.forEach((image) => {
+        gallery
+.filter(x=>x.isNew)
+.forEach(x=>{
 
-            formData.append(
-                "images",
-                image
-            );
+formData.append(
 
-        });
+"images",
+
+x.file
+
+);
+
+});
+
 
         if (editingChapter) {
 
@@ -272,6 +367,85 @@ return (
                                     )
                                 }
                             />
+                            <Form.Check
+
+label="Thêm vào cuối"
+
+checked={!insertMode}
+
+onChange={()=>
+
+setInsertMode(false)
+
+}
+
+/>
+
+<Form.Check
+
+label="Chèn vào vị trí"
+
+checked={insertMode}
+
+onChange={()=>
+
+setInsertMode(true)
+
+}
+
+/>
+
+{
+insertMode &&
+
+<Form.Select
+
+className="mt-2"
+
+value={insertAfter}
+
+onChange={(e)=>
+
+setInsertAfter(e.target.value)
+
+}
+
+>
+
+<option value="0">
+
+Đầu chương
+
+</option>
+
+{
+    gallery.map((img,index)=>(
+        <Col md={3} key={img.id}>
+
+            <Card>
+
+                <Image
+                    src={img.image_url}
+                    height={220}
+                    style={{
+                        width:"100%",
+                        objectFit:"cover"
+                    }}
+                />
+
+                <Card.Body>
+                    Trang {index + 1}
+                </Card.Body>
+
+            </Card>
+
+        </Col>
+    ))
+}
+
+</Form.Select>
+
+}
                             
 
                         </Form.Group>
@@ -347,40 +521,65 @@ return (
 
                             {
 
-                                oldImages.map((img) => (
+                                <PhotoProvider>
 
-                                    <Col
-                                        md={3}
-                                        key={img.id}
-                                        className="mb-3"
+                                    <DndContext
+                                        collisionDetection={closestCenter}
+                                        onDragEnd={handleDragEnd}
                                     >
 
-                                        <Card className="shadow-sm h-100">
+                                    <SortableContext
+                                        items={gallery.map(x => x.id)}
+                                        strategy={rectSortingStrategy}
+                                    >
 
-                                            <Image
-                                                src={`http://localhost:5000/uploads/${img.image_url}`}
-                                                fluid
-                                                rounded
-                                                style={{
-                                                    height: 220,
-                                                    width: "100%",
-                                                    objectFit: "cover"
-                                                }}
-                                            />
+                                    <Row>
 
-                                            <Card.Body
-                                                className="text-center"
-                                            >
+                                    {
 
-                                                Trang {img.page_number}
+                                    gallery.map((img,index)=>(
 
-                                            </Card.Body>
+                                    <Col
+                                    md={3}
+                                    key={img.id}
+                                    className="mb-3"
+                                    >
 
-                                        </Card>
+                                    <PhotoView
+                                    src={img.image_url}
+                                    >
+
+                                    <div>
+
+                                    <SortableImageCard
+
+                                    image={img}
+
+                                    index={index}
+
+                                    onDelete={deleteImage}
+
+                                    onPreview={preview}
+
+                                    />
+
+                                    </div>
+
+                                    </PhotoView>
 
                                     </Col>
 
-                                ))
+                                    ))
+
+                                    }
+
+                                    </Row>
+
+                                    </SortableContext>
+
+                                    </DndContext>
+
+                                    </PhotoProvider>
 
                             }
 
@@ -466,21 +665,22 @@ return (
                     </Button>
 
                 </div>
-                <Button
-variant="outline-danger"
-size="sm"
-onClick={()=>{
+<Button
+    variant="outline-danger"
+    size="sm"
+    onClick={() => {
 
-setImages([]);
+        setGallery([]);
 
-setPreviewImages([]);
-setOldImages([]);
+        setImages([]);
 
-}}
+        setPreviewImages([]);
+
+        setOldImages([]);
+
+    }}
 >
-
-Xóa tất cả ảnh
-
+    Xóa tất cả ảnh
 </Button>
 
             </Form>
