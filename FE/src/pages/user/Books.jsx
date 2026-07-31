@@ -215,13 +215,13 @@ useEffect(() => {
 
                             </p>
 
-                            <p>
+                            {/* <p>
 
                                 <FaEye className="text-primary me-2"/>
 
                                 {book.views}
 
-                            </p>
+                            </p> */}
 
                            
 

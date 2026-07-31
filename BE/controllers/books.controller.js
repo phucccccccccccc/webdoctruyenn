@@ -437,15 +437,7 @@ export const getChapter = (req, res) => {
     }
 
 };
-export const updateReadingHistory = (req, res) => {
 
-    const userId = req.user.id;
-
-    const { book_id } = req.body;
-
-    // dùng userId thay vì req.body.user_id
-
-};
 export const createBook = async (req, res) => {
     try {
 

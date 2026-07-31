@@ -8,6 +8,7 @@ import {
     
 } from "react-icons/fa";
 import { Link } from "react-router-dom";
+
 export default function Home() {
 
 
@@ -127,13 +128,13 @@ const renderBooks = (books) => (
 
                             </p>
 
-                            <p>
+                            {/* <p>
 
                                 <FaEye className="text-primary me-2"/>
 
                                 {book.views}
 
-                            </p>
+                            </p> */}
 
 
                             <Link

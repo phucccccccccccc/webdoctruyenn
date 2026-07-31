@@ -124,7 +124,7 @@ export const getTransactionStatistics = (req, res) => {
     });
 
 };
-export const getTransactionChart = (req, res) => {
+export const  getTransactionChart = (req, res) => {
 
     const { type } = req.query;
 

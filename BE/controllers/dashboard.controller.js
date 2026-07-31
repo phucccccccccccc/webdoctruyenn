@@ -142,13 +142,14 @@ export const getRecentTransactions = (req, res) => {
         SELECT
             t.id,
             u.username,
-            t.type,
+            b.title,
             t.amount,
-            t.description,
             t.created_at
         FROM transactions t
-        LEFT JOIN users u
-            ON u.id = t.user_id
+        JOIN users u
+        ON u.id = t.user_id
+        JOIN books b
+        ON b.id = t.book_id
         ORDER BY t.created_at DESC
         LIMIT 10
     `;

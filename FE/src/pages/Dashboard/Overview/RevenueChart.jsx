@@ -42,41 +42,31 @@ export default function RevenueChart() {
 
         api.get("/dashboard/revenue")
 
-            .then((res) => {
+           .then((res) => {
 
-                const labels = res.data.map(item => item.day);
+    const labels = res.data.map(item =>
+        new Date(item.day).toLocaleDateString("vi-VN")
+    );
 
-                const revenue = res.data.map(item => item.revenue);
+    const revenue = res.data.map(item => item.revenue);
 
-                setChartData({
+    setChartData({
+        labels,
+        datasets: [
+            {
+                label: "Doanh thu Coin",
+                data: revenue,
+                borderColor: "#198754",
+                backgroundColor: "rgba(25,135,84,.2)",
+                tension: 0.4,
+                fill: true
+            }
+        ]
+    });
 
-                    labels,
+    setLoading(false);
 
-                    datasets: [
-
-                        {
-
-                            label: "Doanh thu Coin",
-
-                            data: revenue,
-
-                            borderColor: "#198754",
-
-                            backgroundColor: "rgba(25,135,84,.2)",
-
-                            tension: .4,
-
-                            fill: true
-
-                        }
-
-                    ]
-
-                });
-
-                setLoading(false);
-
-            })
+})
 
             .catch(err => {
 

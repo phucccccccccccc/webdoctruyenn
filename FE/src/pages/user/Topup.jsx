@@ -96,7 +96,7 @@ export default function Topup() {
                         <h5>5.000đ</h5>
 
                         <Button
-    variant="danger"
+    variant="success"
     onClick={() => {
         
         handlePayment(5000, 50);
@@ -117,6 +117,7 @@ export default function Topup() {
                         <h5>10.000đ</h5>
 
                         <Button
+                        variant="success"
                             onClick={() => handlePayment(10000, 100)}
                         >
                             Thanh toán
@@ -135,6 +136,7 @@ export default function Topup() {
                         <h5>50.000đ</h5>
 
                         <Button
+                        variant="success"
                             onClick={() => handlePayment(50000, 500)}
                         >
                             Thanh toán
@@ -241,8 +243,38 @@ export default function Topup() {
                 </Modal.Body>
 
             </Modal>
+            <hr />
+
+<div className="mt-3">
+    <h6 className="text-danger">
+        Gặp sự cố?
+    </h6>
+
+    <small className="text-muted d-block">
+        Nếu đã chuyển khoản thành công nhưng Coin chưa được cộng sau vài phút,
+        vui lòng liên hệ để được hỗ trợ.
+    </small>
+
+    <div className="mt-2">
+        <strong>Zalo:</strong> 0789789789
+    </div>
+
+    <div>
+        <strong>Email:</strong> phucdanghaihoang@gmail.com
+    </div>
+
+    <small className="text-secondary d-block mt-2">
+        Khi liên hệ, vui lòng cung cấp:
+        <ul className="text-start mt-2 mb-0">
+            <li>Mã giao dịch hoặc ảnh chụp chuyển khoản.</li>
+            <li>Mã thanh toán: <strong>{orderCode}</strong></li>
+            <li>Tài khoản đăng nhập.</li>
+        </ul>
+    </small>
+</div>
 
         </Container>
+        
 
     );
 

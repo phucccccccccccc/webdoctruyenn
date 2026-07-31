@@ -169,7 +169,7 @@ const handleBuy = async () => {
 
                     </p>
 
-                    <p>
+                    {/* <p>
 
                         <FaEye/>
 
@@ -185,7 +185,7 @@ const handleBuy = async () => {
 
                         {book.favorites}
 
-                    </p>
+                    </p> */}
 
                     <hr/>
 
@@ -193,34 +193,21 @@ const handleBuy = async () => {
 
                         <strong>Nhà xuất bản:</strong>
 
-                        {book.publisher}
+                        {book.author}
 
                     </p>
+
+                   
 
                     <p>
 
-                        <strong>Năm xuất bản:</strong>
+                        <strong>Ngày cập nhật: </strong>
 
-                        {book.publish_year}
-
-                    </p>
-
-                    <p>
-
-                        <strong>Số trang:</strong>
-
-                        {book.page_count}
+    {new Date(book.created_at).toLocaleDateString("vi-VN")}
 
                     </p>
 
-                    <p>
-
-                        <strong>Ngôn ngữ:</strong>
-
-                        {book.language}
-
-                    </p>
-
+                 
                   
 
                     <Button
