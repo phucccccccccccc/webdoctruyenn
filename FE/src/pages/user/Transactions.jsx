@@ -35,7 +35,7 @@ export default function Transactions() {
                         Lịch sử giao dịch
                     </h3>
 
-                    <Table bordered hover>
+                    <Table bordered hover responsive>
 
                         <thead>
 
@@ -58,60 +58,88 @@ export default function Transactions() {
                         <tbody>
 
                             {
-                                transactions.map((item, index) => (
 
-                                    <tr key={item.id}>
+                                transactions.length > 0 ? (
 
-                                        <td>{index + 1}</td>
+                                    transactions.map((item, index) => (
 
-                                        <td>{item.description}</td>
+                                        <tr key={`${item.type}-${item.id}-${index}`}>
 
-                                        <td>
+                                            <td>{index + 1}</td>
 
-                                            {
-                                                item.type === "topup"
+                                            <td>{item.description}</td>
 
-                                                    ?
+                                            <td>
 
-                                                    <span className="text-success">
-                                                        +{item.amount}
-                                                    </span>
-
-                                                    :
-
-                                                    <span className="text-danger">
-                                                        -{item.amount}
-                                                    </span>
-
-                                            }
-
-                                        </td>
-
-                                        <td>
-
-                                            <Badge
-                                                bg={
-                                                    item.type === "topup"
-                                                        ? "success"
-                                                        : "danger"
-                                                }
-                                            >
                                                 {
+
                                                     item.type === "topup"
-                                                        ? "Nạp coin"
-                                                        : "Mua sách"
+
+                                                        ?
+
+                                                        <span className="text-success fw-bold">
+                                                            +{item.amount}
+                                                        </span>
+
+                                                        :
+
+                                                        <span className="text-danger fw-bold">
+                                                            -{item.amount}
+                                                        </span>
+
                                                 }
-                                            </Badge>
 
-                                        </td>
+                                            </td>
 
-                                        <td>
-                                            {new Date(item.created_at).toLocaleString("vi-VN")}
+                                            <td>
+
+                                                <Badge
+                                                    bg={
+                                                        item.type === "topup"
+                                                            ? "success"
+                                                            : "danger"
+                                                    }
+                                                >
+
+                                                    {
+
+                                                        item.type === "topup"
+
+                                                            ? "Nạp coin"
+
+                                                            : "Mua sách"
+
+                                                    }
+
+                                                </Badge>
+
+                                            </td>
+
+                                            <td>
+
+                                                {new Date(item.created_at).toLocaleString("vi-VN")}
+
+                                            </td>
+
+                                        </tr>
+
+                                    ))
+
+                                ) : (
+
+                                    <tr>
+
+                                        <td
+                                            colSpan={5}
+                                            className="text-center text-muted"
+                                        >
+                                            Chưa có giao dịch nào.
                                         </td>
 
                                     </tr>
 
-                                ))
+                                )
+
                             }
 
                         </tbody>

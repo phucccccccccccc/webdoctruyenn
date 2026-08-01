@@ -41,15 +41,32 @@ export const getTransactions = (req, res) => {
         SELECT
             id,
             amount,
-            type,
+            'spend' AS type,
             description,
             created_at
         FROM transactions
         WHERE user_id = ?
-        ORDER BY created_at DESC
+
+        UNION ALL
+
+       SELECT
+    id,
+    coin AS amount,
+    'topup' AS type,
+    CONCAT(
+        'Nạp gói ',
+        coin,
+        ' Coin (',
+        FORMAT(amount, 0),
+        'đ)'
+    ) AS description,
+    created_at
+FROM payments
+WHERE user_id = ?
+AND status = 'paid'
     `;
 
-    db.query(sql, [userId], (err, result) => {
+    db.query(sql, [userId, userId], (err, result) => {
 
         if (err)
             return res.status(500).json(err);

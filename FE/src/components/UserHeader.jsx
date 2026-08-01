@@ -80,30 +80,24 @@ const handleKeyDown = (e) => {
 };
 useEffect(() => {
 
+    api.get("/category")
+        .then((res) => {
+            setCategories(res.data);
+        })
+        .catch(console.log);
+
     if (!user) return;
 
     loadProfile();
 
-    api.get("/category")
-        .then((res) => {
-
-            setCategories(res.data);
-
-        })
-        .catch(console.log);
-
     const updateCoin = () => {
-
         loadProfile();
-
     };
 
     window.addEventListener("coinUpdated", updateCoin);
 
     return () => {
-
         window.removeEventListener("coinUpdated", updateCoin);
-
     };
 
 }, [user]);
