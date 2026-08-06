@@ -177,3 +177,27 @@ export const toggleUserStatus = (req, res) => {
     );
 
 };
+export const updateUserStatus = (req, res) => {
+
+    const { id } = req.params;
+    const { status } = req.body;
+
+    db.query(
+        "UPDATE users SET status = ? WHERE id = ?",
+        [status, id],
+        (err) => {
+
+            if (err) {
+                return res.status(500).json({
+                    message: err.message
+                });
+            }
+
+            res.json({
+                message: "Cập nhật thành công"
+            });
+
+        }
+    );
+
+};

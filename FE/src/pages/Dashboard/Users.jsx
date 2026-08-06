@@ -34,6 +34,24 @@ export default function User(){
         .catch(console.log);
 
 };
+const handleToggleStatus = async (id, status) => {
+
+    
+    try {
+
+        await api.put(`/user/block/${id}`);
+
+        loadUsers();
+
+    } catch (err) {
+
+        console.log(err);
+
+        alert(err.response?.data?.message || "Có lỗi xảy ra");
+
+    }
+
+};
 const removeVietnameseTones = (str) => {
 
     return (str || "")
@@ -148,22 +166,26 @@ useEffect(() => {
 
             <td>
 
-                <Button
-                    size="sm"
-                    variant={
-                        user.status === "blocked"
-                            ? "success"
-                            : "danger"
-                    }
-                >
-
-                    {
-                        user.status === "blocked"
-                            ? "Mở khóa"
-                            : "Khóa"
-                    }
-
-                </Button>
+               <Button
+    size="sm"
+    variant={
+        user.status === "blocked"
+            ? "success"
+            : "danger"
+    }
+    onClick={() =>
+        handleToggleStatus(
+            user.id,
+            user.status
+        )
+    }
+>
+    {
+        user.status === "blocked"
+            ? "Mở khóa"
+            : "Khóa"
+    }
+</Button>
 
             </td>
 
