@@ -1,5 +1,5 @@
 import jwt from "jsonwebtoken";
-
+import {db} from "../config/config.js";
 export const verifyToken = (req, res, next) => {
 
     const authHeader = req.headers.authorization;
@@ -25,9 +25,37 @@ export const verifyToken = (req, res, next) => {
             process.env.JWT_SECRET
         );
 
-        req.user = decoded;
+        // Kiểm tra trạng thái tài khoản
+        db.query(
+            "SELECT status FROM users WHERE id = ?",
+            [decoded.id],
+            (err, result) => {
 
-        next();
+                if (err) {
+                    return res.status(500).json({
+                        message: "Lỗi server"
+                    });
+                }
+
+                if (result.length === 0) {
+                    return res.status(401).json({
+                        message: "Tài khoản không tồn tại"
+                    });
+                }
+
+                if (result[0].status === "blocked") {
+                    return res.status(403).json({
+                        code: "ACCOUNT_BLOCKED",
+                        message: "Tài khoản đã bị khóa"
+                    });
+                }
+
+                req.user = decoded;
+
+                next();
+
+            }
+        );
 
     } catch {
 

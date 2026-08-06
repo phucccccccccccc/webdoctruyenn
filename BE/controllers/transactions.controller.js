@@ -39,31 +39,18 @@ export const getTransactions = (req, res) => {
 
     const sql = `
         SELECT
-            id,
-            amount,
-            'spend' AS type,
-            description,
-            created_at
-        FROM transactions
-        WHERE user_id = ?
-
-        UNION ALL
-
-       SELECT
-    id,
-    coin AS amount,
-    'topup' AS type,
-    CONCAT(
-        'Nạp gói ',
-        coin,
-        ' Coin (',
-        FORMAT(amount, 0),
-        'đ)'
-    ) AS description,
-    created_at
-FROM payments
-WHERE user_id = ?
-AND status = 'paid'
+    t.id,
+    u.username,
+    b.title,
+    t.amount,
+    t.created_at
+FROM transactions t
+JOIN users u
+    ON t.user_id = u.id
+JOIN books b
+    ON ...
+ORDER BY t.created_at DESC
+LIMIT 10;
     `;
 
     db.query(sql, [userId, userId], (err, result) => {
@@ -78,37 +65,16 @@ AND status = 'paid'
 };
 export const getTransactionStatistics = (req, res) => {
 
-    const sql = `
+    const transactionSql = `
         SELECT
-
             COUNT(*) AS totalTransactions,
 
-            SUM(
-                CASE
-                    WHEN type = 'earn'
-                    THEN 1
-                    ELSE 0
-                END
-            ) AS totalRecharge,
-
-            SUM(
+            COUNT(
                 CASE
                     WHEN type = 'spend'
                     THEN 1
-                    ELSE 0
                 END
             ) AS totalPurchase,
-
-            IFNULL(
-                SUM(
-                    CASE
-                        WHEN type = 'earn'
-                        THEN amount
-                        ELSE 0
-                    END
-                ),
-                0
-            ) AS totalCoinRecharge,
 
             IFNULL(
                 SUM(
@@ -120,205 +86,230 @@ export const getTransactionStatistics = (req, res) => {
                 ),
                 0
             ) AS totalRevenue
-
         FROM transactions
     `;
 
-    db.query(sql, (err, result) => {
+    const paymentSql = `
+        SELECT
+            COUNT(*) AS totalRecharge,
 
-        if (err) {
+            IFNULL(SUM(coin), 0) AS totalCoinRecharge
+        FROM payments
+        WHERE status = 'paid'
+    `;
 
-            console.log(err);
+    db.query(transactionSql, (err, transactionResult) => {
 
-            return res.status(500).json({
-                message: "Lỗi server"
+        if (err)
+            return res.status(500).json({ message: "Lỗi server" });
+
+        db.query(paymentSql, (err, paymentResult) => {
+
+            if (err)
+                return res.status(500).json({ message: "Lỗi server" });
+
+            res.json({
+
+                totalTransactions: transactionResult[0].totalTransactions,
+
+                totalPurchase: transactionResult[0].totalPurchase,
+
+                totalRevenue: transactionResult[0].totalRevenue,
+
+                totalRecharge: paymentResult[0].totalRecharge,
+
+                totalCoinRecharge: paymentResult[0].totalCoinRecharge
+
             });
 
-        }
-
-        res.json(result[0]);
+        });
 
     });
 
 };
-export const  getTransactionChart = (req, res) => {
+export const getTransactionChart = (req, res) => {
 
     const { type } = req.query;
 
-    let sql = "";
+    let spendSql = "";
+    let paymentSql = "";
 
     if (type === "week") {
 
-        sql = `
+        spendSql = `
             SELECT
                 DATE(created_at) AS label,
-
-                SUM(
-                    CASE
-                        WHEN type = 'spend' THEN amount
-                        ELSE 0
-                    END
-                ) AS spend,
-
-                SUM(
-                    CASE
-                        WHEN type = 'earn' THEN amount
-                        ELSE 0
-                    END
-                ) AS earn
-
+                SUM(amount) AS spend
             FROM transactions
-
             WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL 6 DAY)
-
             GROUP BY DATE(created_at)
+        `;
 
-            ORDER BY DATE(created_at)
+        paymentSql = `
+            SELECT
+                DATE(created_at) AS label,
+                SUM(coin) AS earn
+            FROM payments
+            WHERE status = 'paid'
+              AND created_at >= DATE_SUB(CURDATE(), INTERVAL 6 DAY)
+            GROUP BY DATE(created_at)
         `;
 
     }
 
     else if (type === "month") {
 
-        sql = `
+        spendSql = `
             SELECT
                 MONTH(created_at) AS label,
-
-                SUM(
-                    CASE
-                        WHEN type = 'spend' THEN amount
-                        ELSE 0
-                    END
-                ) AS spend,
-
-                SUM(
-                    CASE
-                        WHEN type = 'earn' THEN amount
-                        ELSE 0
-                    END
-                ) AS earn
-
+                SUM(amount) AS spend
             FROM transactions
-
             WHERE YEAR(created_at) = YEAR(CURDATE())
-
             GROUP BY MONTH(created_at)
+        `;
 
-            ORDER BY MONTH(created_at)
+        paymentSql = `
+            SELECT
+                MONTH(created_at) AS label,
+                SUM(coin) AS earn
+            FROM payments
+            WHERE status = 'paid'
+              AND YEAR(created_at) = YEAR(CURDATE())
+            GROUP BY MONTH(created_at)
         `;
 
     }
 
     else {
 
-        sql = `
+        spendSql = `
             SELECT
                 YEAR(created_at) AS label,
-
-                SUM(
-                    CASE
-                        WHEN type = 'spend' THEN amount
-                        ELSE 0
-                    END
-                ) AS spend,
-
-                SUM(
-                    CASE
-                        WHEN type = 'earn' THEN amount
-                        ELSE 0
-                    END
-                ) AS earn
-
+                SUM(amount) AS spend
             FROM transactions
-
             GROUP BY YEAR(created_at)
+        `;
 
-            ORDER BY YEAR(created_at)
+        paymentSql = `
+            SELECT
+                YEAR(created_at) AS label,
+                SUM(coin) AS earn
+            FROM payments
+            WHERE status = 'paid'
+            GROUP BY YEAR(created_at)
         `;
 
     }
 
-    db.query(sql, (err, result) => {
+    db.query(spendSql, (err, spendResult) => {
 
-        if (err) {
+        if (err)
+            return res.status(500).json({ message: "Lỗi server" });
 
-            console.log(err);
+        db.query(paymentSql, (err, paymentResult) => {
 
-            return res.status(500).json({
-                message: "Lỗi server"
-            });
+            if (err)
+                return res.status(500).json({ message: "Lỗi server" });
 
-        }
+            if (type === "week") {
 
-        if (type === "week") {
+                const data = [];
 
-            const data = [];
+                for (let i = 6; i >= 0; i--) {
 
-            for (let i = 6; i >= 0; i--) {
+                    const d = new Date();
 
-                const d = new Date();
+                    d.setDate(d.getDate() - i);
 
-                d.setDate(d.getDate() - i);
+                    const key = d.toISOString().slice(0, 10);
 
-                const key = d.toISOString().slice(0, 10);
+                    const spend = spendResult.find(
+                        x => x.label.toISOString().slice(0, 10) === key
+                    );
 
-                const found = result.find(
-                    x => x.label.toISOString().slice(0, 10) === key
-                );
+                    const earn = paymentResult.find(
+                        x => x.label.toISOString().slice(0, 10) === key
+                    );
 
-                data.push({
+                    data.push({
 
-                    label: `${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(2, "0")}`,
+                        label: `${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(2, "0")}`,
 
-                    spend: found ? Number(found.spend) : 0,
+                        spend: spend ? Number(spend.spend) : 0,
 
-                    earn: found ? Number(found.earn) : 0
+                        earn: earn ? Number(earn.earn) : 0
 
-                });
+                    });
 
-            }
+                }
 
-            return res.json(data);
-
-        }
-
-        if (type === "month") {
-
-            const data = [];
-
-            for (let i = 1; i <= 12; i++) {
-
-                const found = result.find(
-                    x => Number(x.label) === i
-                );
-
-                data.push({
-
-                    label: `T${i}`,
-
-                    spend: found ? Number(found.spend) : 0,
-
-                    earn: found ? Number(found.earn) : 0
-
-                });
+                return res.json(data);
 
             }
 
-            return res.json(data);
+            if (type === "month") {
 
-        }
+                const data = [];
 
-        const data = result.map(item => ({
+                for (let i = 1; i <= 12; i++) {
 
-            label: item.label.toString(),
+                    const spend = spendResult.find(
+                        x => Number(x.label) === i
+                    );
 
-            spend: Number(item.spend),
+                    const earn = paymentResult.find(
+                        x => Number(x.label) === i
+                    );
 
-            earn: Number(item.earn)
+                    data.push({
 
-        }));
+                        label: `T${i}`,
 
-        return res.json(data);
+                        spend: spend ? Number(spend.spend) : 0,
+
+                        earn: earn ? Number(earn.earn) : 0
+
+                    });
+
+                }
+
+                return res.json(data);
+
+            }
+
+            const years = new Set();
+
+            spendResult.forEach(x => years.add(Number(x.label)));
+
+            paymentResult.forEach(x => years.add(Number(x.label)));
+
+            const data = [...years]
+                .sort((a, b) => a - b)
+                .map(year => {
+
+                    const spend = spendResult.find(
+                        x => Number(x.label) === year
+                    );
+
+                    const earn = paymentResult.find(
+                        x => Number(x.label) === year
+                    );
+
+                    return {
+
+                        label: year.toString(),
+
+                        spend: spend ? Number(spend.spend) : 0,
+
+                        earn: earn ? Number(earn.earn) : 0
+
+                    };
+
+                });
+
+            res.json(data);
+
+        });
 
     });
 

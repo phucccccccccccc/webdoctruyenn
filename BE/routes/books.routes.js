@@ -24,6 +24,7 @@
     const router = express.Router();
 
     router.get("/", getBooks);
+
     router.post(
 
         "/",
@@ -48,7 +49,6 @@
 
     router.get("/category/:id", getBooksByCategory);
 
-    router.get("/:id", getBookById);
 
     router.get("/:id/chapters", getBookChapters);
     router.get(
@@ -67,4 +67,9 @@
         verifyToken,
         buyBook
     );
+
+
+
+    router.get("/:id", getBookById);
+
     export default router;

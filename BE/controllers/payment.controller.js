@@ -315,3 +315,28 @@ export const getPaymentStatus = (req, res) => {
     );
 
 };
+export const getAllPayments = (req, res) => {
+
+    const sql = `
+        SELECT
+            p.id,
+            u.username,
+            p.amount,
+            p.status,
+            p.created_at
+        FROM payments p
+        LEFT JOIN users u
+            ON p.user_id = u.id
+        ORDER BY p.created_at DESC
+        LIMIT 20;
+    `;
+
+    db.query(sql, (err, result) => {
+
+        if (err) return res.status(500).json(err);
+
+        res.json(result);
+
+    });
+
+};

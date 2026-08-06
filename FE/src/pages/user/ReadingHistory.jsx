@@ -41,94 +41,94 @@ export default function ReadingHistory() {
             </h2>
 
 
-            <Row>
+           <Row xs={2} md={3} lg={4} xxl={5} className="g-4">
 
-                {
-                    books.length > 0 ?
+    {
+        books.length > 0 ?
 
-                        books.map((book) => (
+            books.map((book) => (
 
-                            <Col
-                                lg={3}
-                                md={4}
-                                sm={6}
-                                key={book.id}
-                                className="mb-4"
-                            >
+                <Col key={book.id}>
 
-                                <Card className="shadow h-100">
+                    <Card className="h-100 shadow-sm d-flex flex-column">
 
-                                    <Card.Img
-                                        variant="top"
-                                src={book.cover_image}
+                        <Card.Img
+                            variant="top"
+                            src={book.cover_image}
+                            style={{
+                                height: "320px",
+                                width: "100%",
+                                objectFit: "contain",
+                                backgroundColor: "#f5f5f5"
+                            }}
+                        />
+
+                        <Card.Body className="d-flex flex-column">
+
+                            <Card.Title
                                 style={{
-                                    height: "320px",
-                                    width: "100%",
-                                    objectFit: "contain",
-                                    backgroundColor: "#f5f5f5"
-                                        }}
-                                    />
+                                    minHeight: "48px",
+                                    display: "-webkit-box",
+                                    WebkitLineClamp: 2,
+                                    WebkitBoxOrient: "vertical",
+                                    overflow: "hidden"
+                                }}
+                            >
+                                {book.title}
+                            </Card.Title>
 
-                                    <Card.Body>
+                            <p className="text-muted">
+                                {book.author}
+                            </p>
 
-                                        <h5>{book.title}</h5>
+                            <p className="mb-2">
+                                Đang đọc chương <b>{book.chapter_number}</b>
+                            </p>
 
-                                        <p className="text-muted mb-1">
-                                            {book.author}
-                                        </p>
+                            <p className="text-secondary small mb-3">
+                                {new Date(book.last_read_at).toLocaleString()}
+                            </p>
 
-                                        <p className="mb-1">
-                                             Đang đọc chương
-                                            <b> {book.chapter_number}</b>
-                                        </p>
+                            <Link
+                                to={`/books/${book.id}/chapter/${book.chapter_number}`}
+                                className="btn btn-success w-100 mt-auto"
+                            >
+                                Đọc tiếp
+                            </Link>
 
-                                        <p className="text-secondary small">
-                                            {new Date(book.last_read_at).toLocaleString()}
-                                        </p>
+                        </Card.Body>
 
-                                        <Button
-                                            as={Link}
-                                            to={`/books/${book.id}/chapter/${book.chapter_number}`}
-                                            className="w-100"
-                                            variant="success"
-                                        >
-                                            Đọc tiếp
-                                        </Button>
+                    </Card>
 
-                                    </Card.Body>
+                </Col>
 
-                                </Card>
+            ))
 
-                            </Col>
+            :
 
-                        ))
+            <Col xs={12}>
 
-                        :
+                <Card className="shadow-sm text-center p-5">
 
-                        <Col>
+                    <h4>Chưa có lịch sử đọc</h4>
 
-                            <Card className="shadow p-5 text-center">
+                    <p className="text-muted">
+                        Hãy chọn một cuốn truyện để bắt đầu đọc.
+                    </p>
 
-                                <h4>Chưa có lịch sử đọc</h4>
+                    <Link
+                        to="/books"
+                        className="btn btn-success"
+                    >
+                        Khám phá truyện
+                    </Link>
 
-                                <p className="text-muted">
-                                    Hãy chọn một cuốn truyện để bắt đầu đọc.
-                                </p>
+                </Card>
 
-                                <Button
-                                    as={Link}
-                                    to="/books"
-                                >
-                                    Khám phá truyện
-                                </Button>
+            </Col>
+    }
 
-                            </Card>
-
-                        </Col>
-
-                }
-
-            </Row>
+</Row>
 
         </Container>
 

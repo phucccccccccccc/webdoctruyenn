@@ -7,17 +7,17 @@ export default function Categories() {
 
     const [categories, setCategories] = useState([]);
 
-    useEffect(() => {
+        useEffect(() => {
 
-        api.get("/category")
-            .then((res) => {
+            api.get("/category")
+                .then((res) => {
 
-                setCategories(res.data);
+                    setCategories(res.data);
 
-            })
-            .catch(console.log);
+                })
+                .catch(console.log);
 
-    }, []);
+        }, []);
 
     return (
 
@@ -49,12 +49,12 @@ export default function Categories() {
                                     </p>
 
                                     <Button
-                                        as={Link}
-                                        to={`/books/category/${category.id}`}
-                                        variant="success"
-                                    >
-                                        Xem truyện
-                                    </Button>
+    as={Link}
+    to={`/books?category=${category.id}`}
+    variant="success"
+>
+    Xem truyện
+</Button>
 
                                 </Card.Body>
 

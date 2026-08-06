@@ -139,19 +139,17 @@ export const getTopReading = (req, res) => {
 export const getRecentTransactions = (req, res) => {
 
     const sql = `
-        SELECT
-            t.id,
-            u.username,
-            b.title,
-            t.amount,
-            t.created_at
-        FROM transactions t
-        JOIN users u
-        ON u.id = t.user_id
-        JOIN books b
-        ON b.id = t.book_id
-        ORDER BY t.created_at DESC
-        LIMIT 10
+SELECT
+    t.id,
+    u.username,
+    t.description AS title,
+    t.amount,
+    t.created_at
+FROM transactions t
+JOIN users u
+    ON u.id = t.user_id
+ORDER BY t.created_at DESC
+LIMIT 10;
     `;
 
     db.query(sql, (err, result) => {

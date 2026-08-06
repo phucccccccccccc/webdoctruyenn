@@ -103,27 +103,76 @@ useEffect(() => {
                         <th>Email</th>
                         <th>Role</th>
                         <th>Thời Gian Tạo</th>
-                        
+                        <th>Trạng thái</th>
+<th>Thao tác</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {
-                            filteredUsers.map((user) => (
-                                <tr key={user.id}>
-                                    <td>{user.id}</td>
-                                    <td>{user.username}</td>
-                                    <td>{user.email}</td>
-                                    <td>{user.role}</td>
-                                    <td>{new Date(user.created_at).toLocaleDateString("vi-VN")}</td>
-                                     
 
-                                </tr>
+{
+    filteredUsers.map((user) => (
 
+        <tr key={user.id}>
 
-                            ))
-                            
-                        }
-                    </tbody>
+            <td>{user.id}</td>
+
+            <td>{user.username}</td>
+
+            <td>{user.email}</td>
+
+            <td>{user.role}</td>
+
+            <td>
+                {new Date(user.created_at).toLocaleDateString("vi-VN")}
+            </td>
+
+            <td>
+
+                {
+                    user.status === "blocked" ? (
+
+                        <span className="badge bg-danger">
+                            Đã khóa
+                        </span>
+
+                    ) : (
+
+                        <span className="badge bg-success">
+                            Hoạt động
+                        </span>
+
+                    )
+                }
+
+            </td>
+
+            <td>
+
+                <Button
+                    size="sm"
+                    variant={
+                        user.status === "blocked"
+                            ? "success"
+                            : "danger"
+                    }
+                >
+
+                    {
+                        user.status === "blocked"
+                            ? "Mở khóa"
+                            : "Khóa"
+                    }
+
+                </Button>
+
+            </td>
+
+        </tr>
+
+    ))
+}
+
+</tbody>
 
                 </Table>
             </Card.Body>

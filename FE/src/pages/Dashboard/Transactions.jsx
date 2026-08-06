@@ -23,7 +23,7 @@ export default function Transactions() {
         totalCoinRecharge: 0,
         totalRevenue: 0
     });
-
+    const [payments, setPayments] = useState([]);
     const [loading, setLoading] = useState(true);
 
     const [search, setSearch] = useState("");
@@ -33,17 +33,19 @@ export default function Transactions() {
     useEffect(() => {
 
         Promise.all([
-            api.get("/transactions/admin"),
-            api.get("/transactions/statistics")
-        ])
-            .then(([transactionRes, statRes]) => {
+    api.get("/transactions/admin"),
+    api.get("/transactions/statistics"),
+    api.get("/payments/admin")
+])
+.then(([transactionRes, statRes, paymentRes]) => {
 
-                setTransactions(transactionRes.data);
-                setStats(statRes.data);
+    setTransactions(transactionRes.data);
+    setStats(statRes.data);
+    setPayments(paymentRes.data);
 
-            })
-            .catch(console.log)
-            .finally(() => setLoading(false));
+})
+.catch(console.log)
+.finally(() => setLoading(false));
 
     }, []);
 
@@ -57,32 +59,50 @@ export default function Transactions() {
             .toLowerCase();
 
     };
+const filteredPayments = useMemo(() => {
 
-    const filteredTransactions = useMemo(() => {
+    return [...payments]
+        .filter((item) => {
 
-        return [...transactions]
-            .filter((item) => {
+            const keyword = removeVietnameseTones(search)
+                .trim()
+                .split(/\s+/);
 
-                if (typeFilter && item.type !== typeFilter)
-                    return false;
+            const username = removeVietnameseTones(item.username);
 
-                const keyword = removeVietnameseTones(search)
-                    .trim()
-                    .split(/\s+/);
+            const status = removeVietnameseTones(item.status);
 
-                const username = removeVietnameseTones(item.username);
+            return keyword.every(word =>
+                username.includes(word) ||
+                status.includes(word)
+            );
 
-                const description = removeVietnameseTones(item.description);
+        })
+        .sort((a, b) => b.id - a.id);
 
-                return keyword.every(word =>
-                    username.includes(word) ||
-                    description.includes(word)
-                );
+}, [payments, search]);
+   const filteredTransactions = useMemo(() => {
 
-            })
-            .sort((a, b) => b.id - a.id);
+    return [...transactions]
+        .filter((item) => {
 
-    }, [transactions, search, typeFilter]);
+            const keyword = removeVietnameseTones(search)
+                .trim()
+                .split(/\s+/);
+
+            const username = removeVietnameseTones(item.username);
+
+            const description = removeVietnameseTones(item.description);
+
+            return keyword.every(word =>
+                username.includes(word) ||
+                description.includes(word)
+            );
+
+        })
+        .sort((a, b) => b.id - a.id);
+
+}, [transactions, search]);
 
     if (loading) {
 
@@ -199,13 +219,31 @@ export default function Transactions() {
                     <Col md={3} className="mb-2">
 
                         <Form.Select
-                            value={typeFilter}
-                            onChange={(e) => setTypeFilter(e.target.value)}
-                        >
-                            <option value="">Tất cả</option>
-                            <option value="earn">Nạp coin</option>
-                            <option value="spend">Mua sách</option>
-                        </Form.Select>
+    value={typeFilter}
+    onChange={(e) => {
+
+        const value = e.target.value;
+
+        setTypeFilter(value);
+
+        if (value === "earn") {
+
+            api.get("/payments/admin")
+                .then((res) => {
+
+                    setPayments(res.data);
+
+                })
+                .catch(console.log);
+
+        }
+
+    }}
+>
+        <option value="spend">Mua sách</option>
+
+    <option value="earn">Nạp coin</option>
+</Form.Select>
 
                     </Col>
 
@@ -241,52 +279,73 @@ export default function Transactions() {
 
                     </thead>
 
-                    <tbody>
-                                                {
-                            filteredTransactions.length === 0 ? (
-                                <tr>
-                                    <td colSpan={6} className="text-center">
-                                        Không có dữ liệu
-                                    </td>
-                                </tr>
-                            ) : (
-                                filteredTransactions.map((item) => (
-                                    <tr key={item.id}>
+<tbody>
 
-                                        <td>{item.id}</td>
+{
+    typeFilter === "earn"
 
-                                        <td>{item.username}</td>
+    ? filteredPayments.map((item) => (
 
-                                        <td>
-                                            {
-                                                item.type === "earn" ? (
-                                                    <Badge bg="success">
-                                                        Nạp coin
-                                                    </Badge>
-                                                ) : (
-                                                    <Badge bg="danger">
-                                                        Mua sách
-                                                    </Badge>
-                                                )
-                                            }
-                                        </td>
+        <tr key={item.id}>
 
-                                        <td>
-                                            {Number(item.amount).toLocaleString("vi-VN")}
-                                        </td>
+            <td>{item.id}</td>
 
-                                        <td>{item.description}</td>
+            <td>{item.username}</td>
 
-                                        <td>
-                                            {new Date(item.created_at).toLocaleString("vi-VN")}
-                                        </td>
+            <td>
+                <Badge bg="success">
+                    Nạp coin
+                </Badge>
+            </td>
 
-                                    </tr>
-                                ))
-                            )
-                        }
+            <td>{Number(item.amount).toLocaleString("vi-VN")}</td>
 
-                    </tbody>
+<td>
+    {
+        item.status === "paid" ? (
+            <strong className="text-success">
+                Đã thanh toán
+            </strong>
+        ) : (
+            <strong className="text-warning">
+                Chờ thanh toán
+            </strong>
+        )
+    }
+</td>
+            <td>{new Date(item.created_at).toLocaleString("vi-VN")}</td>
+
+        </tr>
+
+    ))
+
+    : filteredTransactions.map((item) => (
+
+        <tr key={item.id}>
+
+            <td>{item.id}</td>
+
+            <td>{item.username}</td>
+
+            <td>
+                <Badge bg="danger">
+                    Mua sách
+                </Badge>
+            </td>
+
+            <td>{Number(item.amount).toLocaleString("vi-VN")}</td>
+
+            <td>{item.description}</td>
+
+            <td>{new Date(item.created_at).toLocaleString("vi-VN")}</td>
+
+        </tr>
+
+    ))
+
+}
+
+</tbody>
 
                 </Table>
 

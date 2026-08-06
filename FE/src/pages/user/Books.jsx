@@ -25,7 +25,7 @@ import {
 export default function Books() {
 
     const [books, setBooks] = useState([]);
-
+ //const [count, setCount] = useState(0);
     const [categories, setCategories] = useState([]);
 
     const [searchParams] = useSearchParams();
@@ -37,17 +37,21 @@ export default function Books() {
     const categoryId = searchParams.get("category") || "";
     
     // Lấy tất cả sách
-    const loadBooks = () => {
+  const loadBooks = () => {
 
-        api.get("/books")
-            .then((res) => {
-                setBooks(res.data);
-            })
-            .catch((err) => {
-                console.log(err);
-            });
+    api.get("/books")
+        .then((res) => {
 
-    };
+            console.log(res.data);
+
+            setBooks(res.data);
+
+        })
+        .catch((err) => {
+            console.log(err);
+        });
+
+};
 
     // Lấy danh mục
     const loadCategories = () => {
@@ -69,6 +73,13 @@ export default function Books() {
 }, []);
 
 useEffect(() => {
+    //  api.get("/books/count")
+    //     .then(res => {
+
+    //         setCount(res.data.tol);
+
+    //     });
+
 
     if (categoryId) {
 
@@ -160,25 +171,22 @@ useEffect(() => {
                 </Col>
 
             </Row>
-
+            {/* <h3>Tổng số sách: {count}</h3>
             <p>
                 Hiển thị <b>{books.length}</b> cuốn truyện
-            </p>
+            </p> */}
 
-            <Row>
+            <Row xs={2} md={3} lg={4} xxl={5} className="g-4">
 
-                {
-                    books.map((book) => (
+        {
 
-                        <Col
-                            lg={3}
-                            md={4}
-                            sm={6}
-                            className="mb-4"
-                            key={book.id}
-                        >
+            books.map((book) => (
 
-                           <Card className="h-100 shadow-sm d-flex flex-column">
+                <Col
+                    key={book.id}
+                >
+
+                    <Card className="h-100 shadow-sm d-flex flex-column">
 
                         <Card.Img
                             variant="top"
@@ -223,24 +231,25 @@ useEffect(() => {
 
                             </p> */}
 
-                           
 
                             <Link
                                 to={`/books/${book.id}`}
-                                className="btn btn-success w-100 mt-auto"
+                                className="btn btn-success w-100"
                             >
                                 Xem chi tiết
                             </Link>
+
                         </Card.Body>
 
                     </Card>
 
-                        </Col>
+                </Col>
 
-                    ))
-                }
+            ))
 
-            </Row>
+        }
+
+    </Row>
 
         </Container>
 

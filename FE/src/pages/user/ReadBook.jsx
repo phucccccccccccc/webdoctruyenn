@@ -119,7 +119,34 @@ export default function Reader() {
         });
 
     };
+    // chặn  copy
+    useEffect(() => {
 
+    const handleContextMenu = (e) => {
+        e.preventDefault();
+    };
+    const handleKeyDown = (e) => {
+
+        const key = e.key.toLowerCase();
+
+        if (
+            (e.ctrlKey && ["c", "s", "u", "p"].includes(key)) ||
+            (e.ctrlKey && e.shiftKey && ["i", "j", "c"].includes(key)) ||
+            e.key === "F12"
+        ) {
+            e.preventDefault();
+        }
+    };
+
+    document.addEventListener("contextmenu", handleContextMenu);
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+        document.removeEventListener("contextmenu", handleContextMenu);
+        document.removeEventListener("keydown", handleKeyDown);
+    };
+
+}, []);
     useEffect(() => {
 
         window.scrollTo(0, 0);
@@ -247,14 +274,20 @@ export default function Reader() {
                             images.map((img) => (
 
                                 <img
-                                    key={img.page_number}
-                                    src={img.image_url}
-                                    alt=""
-                                    style={{
-                                        width: "100%",
-                                        display: "block"
-                                    }}
-                                />
+    key={img.page_number}
+    src={img.image_url}
+    alt=""
+    draggable={false}
+    onContextMenu={(e) => e.preventDefault()}
+    onDragStart={(e) => e.preventDefault()}
+    style={{
+        width: "100%",
+        display: "block",
+        userSelect: "none",
+        WebkitUserSelect: "none",
+        pointerEvents: "auto"
+    }}
+/>
 
                             ))
 

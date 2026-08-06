@@ -149,3 +149,31 @@ export const getProfile = (req, res) => {
     });
 
 };
+export const toggleUserStatus = (req, res) => {
+
+    const { id } = req.params;
+
+    db.query(
+        `
+        UPDATE users
+        SET status =
+            CASE
+                WHEN status = 'active' THEN 'blocked'
+                ELSE 'active'
+            END
+        WHERE id = ?
+        `,
+        [id],
+        (err) => {
+
+            if (err)
+                return res.status(500).json(err);
+
+            res.json({
+                message: "Cập nhật thành công"
+            });
+
+        }
+    );
+
+};

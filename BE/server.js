@@ -51,7 +51,7 @@ app.use("/api/user", userRoutes);
 app.use("/api/transactions", transactionsRoutes);
 app.use("/api/payment", paymentRoutes);
 app.use("/api/chapters", chapterRoutes);
-
+app.use("/api/payments", paymentRoutes);
 // Test JWT
 app.get("/api/profile", verifyToken, (req, res) => {
     res.json(req.user);

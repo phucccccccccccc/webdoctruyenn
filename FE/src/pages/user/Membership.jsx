@@ -37,95 +37,95 @@ export default function Membership() {
 
            
 
-            <h3 className="text-center text-muted mb-5">
+            {/* <h3 className="text-center text-muted mb-5">
                 Bạn đã sở hữu <strong>{books.length}</strong> cuốn truyện
-            </h3>
+            </h3> */}
 
-            <Row>
+            <Row xs={2} md={3} lg={4} xxl={5} className="g-4">
 
-                {
-                    books.length > 0 ?
+    {
+        books.length > 0 ?
 
-                        books.map((book) => (
+            books.map((book) => (
 
-                            <Col
-                                lg={3}
-                                md={4}
-                                sm={6}
-                                className="mb-4"
-                                key={book.id}
-                            >
+                <Col key={book.id}>
 
-                                <Card className="h-100 shadow">
+                    <Card className="h-100 shadow-sm d-flex flex-column">
 
-                                    <Card.Img
-                                        variant="top"
-                                src={book.cover_image}
+                        <Card.Img
+                            variant="top"
+                            src={book.cover_image}
+                            style={{
+                                height: "320px",
+                                width: "100%",
+                                objectFit: "contain",
+                                backgroundColor: "#f5f5f5"
+                            }}
+                        />
+
+                        <Card.Body className="d-flex flex-column">
+
+                            <Card.Title
                                 style={{
-                                    height: "320px",
-                                    width: "100%",
-                                    objectFit: "contain",
-                                    backgroundColor: "#f5f5f5"
-                                        }}
-                                    />
+                                    minHeight: "48px",
+                                    display: "-webkit-box",
+                                    WebkitLineClamp: 2,
+                                    WebkitBoxOrient: "vertical",
+                                    overflow: "hidden"
+                                }}
+                            >
+                                {book.title}
+                            </Card.Title>
 
-                                    <Card.Body className="d-flex flex-column">
+                            <p className="text-muted">
+                                {book.author}
+                            </p>
 
-                                        <h5>{book.title}</h5>
+                            <p className="text-success fw-bold">
+                                ✔ Đã mua
+                            </p>
 
-                                        <p className="text-muted mb-1">
-                                            {book.author}
-                                        </p>
+                            <Link
+                                to={`/books/${book.id}/chapter/1`}
+                                className="btn btn-success w-100 mt-auto"
+                            >
+                                Đọc ngay
+                            </Link>
 
-                                        <p className="text-success fw-bold">
-                                            ✔ Đã mua
-                                        </p>
+                        </Card.Body>
 
-                                        <Button
-                                            as={Link}
-                                            to={`/books/${book.id}/chapter/1`}
-                                            variant="success"
-                                            className="mt-auto"
-                                        >
-                                            Đọc ngay
-                                        </Button>
+                    </Card>
 
-                                    </Card.Body>
+                </Col>
 
-                                </Card>
+            ))
 
-                            </Col>
+            :
 
-                        ))
+            <Col xs={12}>
 
-                        :
+                <Card className="shadow-sm text-center p-5">
 
-                        <Col>
+                    <h4>Bạn chưa mua truyện nào.</h4>
 
-                            <Card className="shadow text-center p-5">
+                    <p className="text-muted">
+                        Hãy khám phá kho truyện của chúng tôi.
+                    </p>
 
-                                <h4>Bạn chưa mua truyện nào.</h4>
+                    <Link
+                        to="/books"
+                        className="btn btn-success"
+                    >
+                        Khám phá truyện
+                    </Link>
 
-                                <p className="text-muted">
-                                    Hãy khám phá kho truyện của chúng tôi.
-                                </p>
+                </Card>
 
-                                <Button
-                                    as={Link}
-                                    to="/books"
-                                    variant="primary"
-                                >
-                                    Khám phá truyện
-                                </Button>
+            </Col>
 
-                            </Card>
+    }
 
-                        </Col>
-
-                }
-
-            </Row>
-
+</Row>
         </Container>
 
     );

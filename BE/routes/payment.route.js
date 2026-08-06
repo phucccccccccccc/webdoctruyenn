@@ -2,7 +2,8 @@ import express from "express";
 import {
     createPayment,
     webhook,
-    getPaymentStatus
+    getPaymentStatus,
+    getAllPayments 
 } from "../controllers/payment.controller.js";
 import { verifyToken } from "../middlewares/auth.middleware.js";
 
@@ -25,5 +26,7 @@ router.get(
     verifyToken,
     getPaymentStatus
 );
+router.get("/admin", getAllPayments);
+
 
 export default router;
