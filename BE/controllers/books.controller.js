@@ -197,7 +197,20 @@ export const getBooksByCategory = (req, res) => {
 };
 export const searchBooks = (req, res) => {
 
-    const keyword = `%${req.params.keyword}%`;
+    const keywords = req.params.keyword
+        .trim()
+        .split(/\s+/);
+
+    const conditions = keywords
+        .map(() => "(title LIKE ? OR author LIKE ?)")
+        .join(" AND ");
+
+    const params = [];
+
+    keywords.forEach((word) => {
+        params.push(`%${word}%`);
+        params.push(`%${word}%`);
+    });
 
     const sql = `
         SELECT
@@ -210,12 +223,11 @@ export const searchBooks = (req, res) => {
             views,
             likes
         FROM books
-        WHERE title LIKE ?
-           OR author LIKE ?
+        WHERE ${conditions}
         ORDER BY created_at DESC
     `;
 
-    db.query(sql, [keyword, keyword], (err, result) => {
+    db.query(sql, params, (err, result) => {
 
         if (err) {
 
